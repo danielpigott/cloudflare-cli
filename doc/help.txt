@@ -1,0 +1,25 @@
+NAME
+    cfcli - Interact with cloudflare from the command line
+
+SYNOPSIS
+    cfcli [options] command [parameters]
+
+OPTIONS:
+    -c  --config    Path to yml file with config defaults (defaults to ~/.cfcli.yml
+    -k  --token     Token for your cloudflare account
+    -e  --email     Email of your cloudflare account
+    -d  --domain    Domain to operate on
+    -t  --type      Type of record (for dns record functions)
+    -h  --help      Display help
+
+COMMANDS:
+    addrecord [name] [content]
+        Add a DNS record
+    disablecf [name]
+        Disable cloudflare caching for given record 
+    enablecf [name]
+        Enable cloudflare caching for given record
+    purgecache
+        Clear all cache files for the domain 
+    removerecord [name]
+        Remove record with given name

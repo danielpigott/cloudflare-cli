@@ -1,0 +1,11 @@
+{
+    "name": "cloudflare-cli",
+    "dependencies" : {
+      "assert" : "1.1.1",
+      "minimist"   :  "0.0.7",
+      "cloudflare"  : "0.0.5",
+      "lodash" : "2.4.1",
+      "show-help" : "1.0.0",
+      "js-yaml" : "3.0.1"
+    }
+}
