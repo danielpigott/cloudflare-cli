@@ -21,5 +21,7 @@ COMMANDS:
         Enable cloudflare caching for given record
     purgecache
         Clear all cache files for the domain 
+    purgefile [url]
+        Purge file at given url 
     removerecord [name]
         Remove record with given name
