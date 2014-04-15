@@ -9,19 +9,20 @@ OPTIONS:
     -k  --token     Token for your cloudflare account
     -e  --email     Email of your cloudflare account
     -d  --domain    Domain to operate on
+    -a  --activate  Active cloudflare after creating record (for addrecord)
     -t  --type      Type of record (for dns record functions)
     -h  --help      Display help
 
 COMMANDS:
     addrecord [name] [content]
-        Add a DNS record
+        Add a DNS record. Use -a to activate cf after creation
     disablecf [name]
-        Disable cloudflare caching for given record 
+        Disable cloudflare caching for given record
     enablecf [name]
         Enable cloudflare caching for given record
     purgecache
-        Clear all cache files for the domain 
+        Clear all cache files for the domain
     purgefile [url]
-        Purge file at given url 
+        Purge file at given url
     removerecord [name]
         Remove record with given name
