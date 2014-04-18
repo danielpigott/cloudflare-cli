@@ -45,5 +45,4 @@ COMMANDS:
         Purge file at given url
     removerecord [name]
         Remove record with given name
-cfcli [options] command [parameters]
 ```
