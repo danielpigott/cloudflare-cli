@@ -20,6 +20,9 @@ defaults:
 
 ##Usage
 ```
+NAME
+    cfcli - Interact with cloudflare from the command line
+
 SYNOPSIS
     cfcli [options] command [parameters]
 
@@ -39,6 +42,10 @@ COMMANDS:
         Disable cloudflare caching for given record
     enablecf [name]
         Enable cloudflare caching for given record
+    listdomains
+        List domains in your cloudflare account
+    listrecords
+        List dns records for the domain
     purgecache
         Clear all cache files for the domain
     purgefile [url]
