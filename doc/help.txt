@@ -18,6 +18,8 @@ COMMANDS:
         Add a DNS record. Use -a to activate cf after creation
     disablecf [name]
         Disable cloudflare caching for given record
+    editrecord [name] [content]
+        Edit a DNS record.
     enablecf [name]
         Enable cloudflare caching for given record
     listdomains
