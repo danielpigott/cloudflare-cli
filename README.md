@@ -32,6 +32,7 @@ OPTIONS:
     -e  --email     Email of your cloudflare account
     -d  --domain    Domain to operate on
     -a  --activate  Active cloudflare after creating record (for addrecord)
+    -f  --format    Format when printing records (csv or table)
     -t  --type      Type of record (for dns record functions)
     -h  --help      Display help
 
