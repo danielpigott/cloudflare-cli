@@ -56,3 +56,19 @@ COMMANDS:
     removerecord [name]
         Remove record with given name
 ```
+
+###Examples
+Add a new A record (mail) and activate cloudflare
+```
+cfcli -a -t A addrecord mail 127.0.0.1
+```
+
+Export domain records for test.com to csv
+```
+cfcli -d test.com -f csv listrecords > test.csv
+```
+
+Purge a single file from cache
+```
+cfcli purgefile http://test.com/script.js
+```
