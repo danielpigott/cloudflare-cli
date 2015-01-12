@@ -10,7 +10,7 @@ CLI for interacting with Cloudflare
 You can setup a yaml config file with default parameters e.g. token and email.
 By default cfcli will look for ".cfcli.yml" in your home directory (you can also pass in a config file with -c)
 
-###Example 
+###Configuration Example 
 ```yaml
 defaults:
     token: <cloudflare-token>
@@ -58,7 +58,7 @@ COMMANDS:
 ```
 
 ###Examples
-Add a new A record (mail) and activate cloudflare
+Add a new A record (mail) and activate cloudflare (-a)
 ```
 cfcli -a -t A addrecord mail 127.0.0.1
 ```
