@@ -31,9 +31,10 @@ OPTIONS:
     -k  --token     Token for your cloudflare account
     -e  --email     Email of your cloudflare account
     -d  --domain    Domain to operate on
-    -a  --activate  Active cloudflare after creating record (for addrecord)
+    -a  --activate  Activate cloudflare after creating record (for addrecord)
     -f  --format    Format when printing records (csv or table)
     -t  --type      Type of record (for dns record functions)
+    -l  --ttl       Set the ttl when adding or editing, between 120 and 86400 seconds, or 1 for automatic.
     -h  --help      Display help
 
 COMMANDS:
@@ -61,6 +62,11 @@ COMMANDS:
 Add a new A record (mail) and activate cloudflare (-a)
 ```
 cfcli -a -t A addrecord mail 127.0.0.1
+```
+
+Edit a record (mail) and set the TTL 
+```
+cfcli --ttl 120 editrecord  mail 127.0.0.1 
 ```
 
 Export domain records for test.com to csv
