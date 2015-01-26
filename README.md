@@ -10,13 +10,31 @@ CLI for interacting with Cloudflare
 You can setup a yaml config file with default parameters e.g. token and email.
 By default cfcli will look for ".cfcli.yml" in your home directory (you can also pass in a config file with -c)
 
-###Configuration Example 
+###Configuration Example
 ```yaml
 defaults:
     token: <cloudflare-token>
     email: <you@domain.com>
     domain: <default-cloudflare-domain>
 ```
+
+or you have two more cloudflare accounts, and you can set up by this.
+
+```yaml
+defaults:
+    account: work
+accounts:
+    work:
+        token: <cloudflare-token>
+        email: <you@domain.com>
+        domain: <default-cloudflare-domain>
+    play:
+        token: <cloudflare-token>
+        email: <you@domain.com>
+        domain: <default-cloudflare-domain>
+```
+
+then you can use `-u play` to interact with another cloudflare account.
 
 ##Usage
 ```
@@ -30,6 +48,7 @@ OPTIONS:
     -c  --config    Path to yml file with config defaults (defaults to ~/.cfcli.yml
     -k  --token     Token for your cloudflare account
     -e  --email     Email of your cloudflare account
+    -u  --account   Choose one of your cloudflare accounts by a short name in config accounts.
     -d  --domain    Domain to operate on
     -a  --activate  Activate cloudflare after creating record (for addrecord)
     -f  --format    Format when printing records (csv or table)
@@ -66,9 +85,9 @@ Add a new A record (mail) and activate cloudflare (-a)
 cfcli -a -t A addrecord mail 127.0.0.1
 ```
 
-Edit a record (mail) and set the TTL 
+Edit a record (mail) and set the TTL
 ```
-cfcli --ttl 120 editrecord  mail 127.0.0.1 
+cfcli --ttl 120 editrecord  mail 127.0.0.1
 ```
 
 Export domain records for test.com to csv
@@ -81,7 +100,7 @@ Purge a single file from cache
 cfcli purgefile http://test.com/script.js
 ```
 
-Enable dev mode for test.com domain 
+Enable dev mode for test.com domain
 ```
 -cfcli -d test.com devmode on
 ```
