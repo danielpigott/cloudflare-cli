@@ -42,8 +42,6 @@ COMMANDS:
         Add a DNS record. Use -a to activate cf after creation
     disablecf [name]
         Disable cloudflare caching for given record
-    devmode [on|off]
-        Toggle development mode on/off
     editrecord [name] [content]
         Edit a DNS record.
     enablecf [name]
@@ -80,9 +78,3 @@ Purge a single file from cache
 ```
 cfcli purgefile http://test.com/script.js
 ```
-
-Enable dev mode 
-```
-cfcli -d test.com devmode on
-```
-
