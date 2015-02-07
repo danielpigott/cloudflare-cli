@@ -105,6 +105,6 @@ cfcli purgefile http://test.com/script.js
 
 Enable dev mode for test.com domain
 ```
--cfcli -d test.com devmode on
+cfcli -d test.com devmode on
 ```
 
