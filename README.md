@@ -3,14 +3,14 @@ cloudflare-cli
 
 CLI for interacting with Cloudflare
 
-##Installation
+## Installation
 `npm install -g cloudflare-cli`
 
-##Setup
+## Setup
 You can setup a yaml config file with default parameters e.g. token and email.
 By default cfcli will look for ".cfcli.yml" in your home directory (you can also pass in a config file with -c)
 
-###Configuration Example
+### Configuration Example
 If you have only one cloudflare account you can set it up as below:
 
 ```yaml
@@ -38,7 +38,8 @@ accounts:
 
 You can then use `-u play` to interact with the second cloudflare account.
 
-##Usage
+## Usage
+
 ```
 NAME
     cfcli - Interact with cloudflare from the command line
@@ -81,7 +82,7 @@ COMMANDS:
         Remove record with given name
 ```
 
-###Examples
+### Examples
 Add a new A record (mail) and activate cloudflare (-a)
 ```
 cfcli -a -t A addrecord mail 127.0.0.1
