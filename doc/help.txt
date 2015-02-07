@@ -8,7 +8,7 @@ OPTIONS:
     -c  --config    Path to yml file with config defaults (defaults to ~/.cfcli.yml
     -k  --token     Token for your cloudflare account
     -e  --email     Email of your cloudflare account
-    -u  --account   Choose one of your cloudflare accounts by a short name in config accounts.
+    -u  --account   Choose one of your named cloudflare accounts from .cfcli.yml
     -d  --domain    Domain to operate on
     -a  --activate  Activate cloudflare after creating record (for addrecord)
     -f  --format    Format when printing records (csv or table)

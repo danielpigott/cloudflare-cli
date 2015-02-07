@@ -11,6 +11,8 @@ You can setup a yaml config file with default parameters e.g. token and email.
 By default cfcli will look for ".cfcli.yml" in your home directory (you can also pass in a config file with -c)
 
 ###Configuration Example
+If you have only one cloudflare account you can set it up as below:
+
 ```yaml
 defaults:
     token: <cloudflare-token>
@@ -18,7 +20,7 @@ defaults:
     domain: <default-cloudflare-domain>
 ```
 
-or you have two more cloudflare accounts, and you can set up by this.
+If you have multiple cloudflare accounts, and you can set up accounts as below: 
 
 ```yaml
 defaults:
@@ -34,7 +36,7 @@ accounts:
         domain: <default-cloudflare-domain>
 ```
 
-then you can use `-u play` to interact with another cloudflare account.
+You can then use `-u play` to interact with the second cloudflare account.
 
 ##Usage
 ```
@@ -48,7 +50,7 @@ OPTIONS:
     -c  --config    Path to yml file with config defaults (defaults to ~/.cfcli.yml
     -k  --token     Token for your cloudflare account
     -e  --email     Email of your cloudflare account
-    -u  --account   Choose one of your cloudflare accounts by a short name in config accounts.
+    -u  --account   Choose one of your named cloudflare accounts from .cfcli.yml
     -d  --domain    Domain to operate on
     -a  --activate  Activate cloudflare after creating record (for addrecord)
     -f  --format    Format when printing records (csv or table)
