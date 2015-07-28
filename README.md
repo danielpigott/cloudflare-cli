@@ -20,7 +20,7 @@ defaults:
     domain: <default-cloudflare-domain>
 ```
 
-If you have multiple cloudflare accounts, and you can set up accounts as below: 
+If you have multiple cloudflare accounts, and you can set up accounts as below:
 
 ```yaml
 defaults:
@@ -56,19 +56,19 @@ OPTIONS:
     -a  --activate  Activate cloudflare after creating record (for addrecord)
     -f  --format    Format when printing records (csv or table)
     -t  --type      Type of record (for dns record functions)
-    -l  --ttl       Set the ttl when adding or editing, between 120 and 86400 seconds, or 1 for automatic.
+    -l  --ttl       Set ttl on add or edit (120 - 86400 seconds, or 1 for auto)
     -h  --help      Display help
 
 COMMANDS:
-    addrecord [name] [content]
+    addrecord <name> <content>
         Add a DNS record. Use -a to activate cf after creation
-    devmode [on|off]
+    devmode on|off
         Toggle development mode on/off
-    disablecf [name]
+    disablecf <name>
         Disable cloudflare caching for given record
-    editrecord [name] [content]
+    editrecord <name> <content>
         Edit a DNS record.
-    enablecf [name]
+    enablecf <name>
         Enable cloudflare caching for given record
     listdomains
         List domains in your cloudflare account
@@ -76,10 +76,10 @@ COMMANDS:
         List dns records for the domain
     purgecache
         Clear all cache files for the domain
-    purgefile [url]
+    purgefile <url>
         Purge file at given url
-    removerecord [name]
-        Remove record with given name
+    removerecord <name> [content]
+        Remove record with given name and optionally specific value
 ```
 
 ### Examples
@@ -91,6 +91,16 @@ cfcli -a -t A addrecord mail 127.0.0.1
 Edit a record (mail) and set the TTL
 ```
 cfcli --ttl 120 editrecord  mail 127.0.0.1
+```
+
+Remove all records with the name test
+```
+cfcli removerecord test
+```
+
+Remove record with name test and value 1.1.1.1
+```
+cfcli removerecord test 1.1.1.1
 ```
 
 Export domain records for test.com to csv
@@ -107,4 +117,3 @@ Enable dev mode for test.com domain
 ```
 cfcli -d test.com devmode on
 ```
-
