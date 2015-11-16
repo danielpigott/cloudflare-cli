@@ -105,11 +105,11 @@ cfcli removerecord test 1.1.1.1
 ```
 Enable cloudflare for any records that match test
 ```
-cfcli --ttl 120 enablecf test
+cfcli enablecf test
 ```
 Enable cloudflare for a record test with the value test.com
 ```
-cfcli --ttl 120 enablecf test test.com
+cfcli enablecf test test.com
 ```
 
 Export domain records for test.com to csv
