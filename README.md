@@ -94,6 +94,11 @@ Edit a record (mail) and set the TTL
 cfcli --ttl 120 editrecord  mail 127.0.0.1
 ```
 
+Add an SRV record (then 3 numbers are priority, weight and port respectively)
+```
+cfcli -t SRV addrecord _sip._tcp.example.com 1 1 1 example.com
+```
+
 Remove all records with the name test
 ```
 cfcli removerecord test
