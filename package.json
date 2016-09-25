@@ -15,10 +15,14 @@
         "type": "git",
         "url": "git://github.com/danielpigott/cloudflare-cli.git"
     },
+    "files": [
+      "index.js",
+      "lib"
+    ],
     "preferGlobal": true,
     "dependencies" : {
       "minimist": "1.2.0",
-      "cloudflare": "0.0.8",
+      "cloudflare": "1.0.4",
       "lodash": "4.13.1",
       "js-yaml": "3.6.1",
       "cli-table": "0.3.1"

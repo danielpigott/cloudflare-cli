@@ -1,2 +1,11 @@
 #!/usr/bin/env node
-var cli = require('../lib/cli').createCli();
+    var _ = require('lodash');
+    var allowedOptions = require('./../lib/options');
+    var CloudflareCli = require('./../index');
+    var ConfigReader = require('./../lib/configReader');
+    var config =  new ConfigReader().readConfig('~/.cfcli.yml');
+    console.log(config);
+    var argv = _.extend(config, require('minimist')(process.argv.slice(2), allowedOptions));
+    var cli = new CloudflareCli(argv);
+
+    cli.runCommand(argv._[0], argv);
