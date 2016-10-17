@@ -1,3 +1,8 @@
+/**
+ *
+ * @param options
+ * @constructor
+ */
 function CloudflareCli(options) {
     var self = this;
     var _ = require('lodash');
@@ -5,11 +10,23 @@ function CloudflareCli(options) {
     var fs = require('fs');
     var format = require('util').format;
     var allowedOptions = require('./lib/options');
+    var client;
+    /**
+     * Available commands
+     * @type {Object}
+     */
     var commands = {
         add: {
             aliases: ['addrecord'],
             callback: addRecord,
-            description: 'Add a new record'
+            description: 'Add a new record',
+            options: ['name', 'content']
+        },
+        find: {
+            aliases: [],
+            callback: findRecord,
+            description: 'Find a record',
+            options: ['pattern']
         },
         help: {
             aliases: [],
@@ -18,7 +35,7 @@ function CloudflareCli(options) {
             description: 'Show help'
         },
         purge: {
-            aliases: ['purgefile'],
+            aliases: ['purge', 'purgefile'],
             callback: purgeCache,
             description: 'Purge files from cache'
         },
@@ -27,13 +44,17 @@ function CloudflareCli(options) {
             callback: toggleDevMode,
             description: "Turn dev mode on or off"
         },
-        rm : {
+        rm: {
             aliases: ['removerecord'],
             callback: removeRecord,
             description: 'Remove a record'
+        },
+        ls: {
+            aliases: ['listrecords', 'list'],
+            callback: listRecords,
+            description: 'List records for given domain'
         }
     };
-    var client;
 
     self.runCommand = runCommand;
     self.showHelp = showHelp;
@@ -47,13 +68,22 @@ function CloudflareCli(options) {
         });
     }
 
+    /**
+     * Run the given command and output the result
+     * @param command
+     * @param options
+     */
     function runCommand(command, options) {
 
         if (commands[command] != undefined) {
             var fn = commands[command].callback;
-            fn(options).then(function(result) {
-              console.log(result);
-            }).catch(function(error) {
+            var opts = _.extend(options, _.zip(commands[command].options, options._));
+            console.log(opts);
+            fn(opts).then(function (result) {
+                _.each(result.messages, function (message) {
+                    console.log(message);
+                });
+            }).catch(function (error) {
                 console.log(error);
             });
         } else {
@@ -61,31 +91,44 @@ function CloudflareCli(options) {
         }
     }
 
+    /**
+     * Create a new record of the given type
+     * @param options
+     * @return {*}
+     */
     function addRecord(options) {
         return getZone(options.domain).then(
             function (zone) {
-            return CFClient.DNSRecord.create({
-                zoneId: zone.id,
-                type: options.type,
-                name: options._[1],
-                content: options._[2],
-                ttl: options.ttl || 1,
-                prio: options.priority || 0
-            })})
-            .then(function(record) {
-            return client.addDNS(record).then(function (newRecord) {
-                console.log(format(
-                    'Added %s record %s -> %s',
-                    newRecord.type,
-                    newRecord.name,
-                    newRecord.content)
-                );
-            });
-        })
+                return CFClient.DNSRecord.create({
+                    zoneId: zone.id,
+                    type: options.type,
+                    name: options.name,
+                    content: options.content,
+                    ttl: options.ttl || 1,
+                    prio: options.priority || 0
+                })
+            })
+            .then(function (record) {
+                return client.addDNS(record);
+            }).then(function (newRecord) {
+                    return new Result(
+                        [
+                            format(
+                                'Added %s record %s -> %s',
+                                newRecord.type,
+                                newRecord.name,
+                                newRecord.content
+                            )
+                        ]
+                    );
+                }
+            )
     }
 
     function editRecord(options) {
+        return getZone(options.domain).then(function (zone) {
 
+        });
     }
 
     /**
@@ -93,9 +136,9 @@ function CloudflareCli(options) {
      * @param options
      */
     function removeRecord(options) {
-        return getZone(options.domain).then(function(zone) {
+        return getZone(options.domain).then(function (zone) {
             return client.browseDNS(zone, {name: options._[1]});
-        }).then(function(records) {
+        }).then(function (records) {
             if (records.count == 0) {
                 throw new Error('No matching records found');
             }
@@ -104,23 +147,38 @@ function CloudflareCli(options) {
                 results.push(client.deleteDNS(record));
             });
             return Promise.all(results);
+        }).then(function (results) {
+            return new Result(results);
         });
+    }
+
+    function findRecord(options) {
     }
 
     function listRecords(options) {
-
+        return getZone(options.domain).then(function (zone) {
+            return client.browseDNS(zone);
+        }).then(function (result) {
+            var rows = [];
+            _.each(result.result, function (item) {
+                rows.push(format('%s %s %s', item.name, item.content, item.type));
+            });
+            return new Result(rows);
+        });
     }
 
+    /**
+     *
+     * @param options
+     */
     function toggleDevMode(options) {
-        getZone(options.domain).then(function (zone) {
+        return getZone(options.domain).then(function (zone) {
             zone.devMode = (options._[1] == 'on');
             return client.editZone(zone);
 
-        }).then(function(result) {
-            console.log(result);
-        }).catch(function(error) {
-            console.log(error);
-        });
+        }).then(function (result) {
+            return new Result([result]);
+        })
     }
 
     /**
@@ -130,11 +188,11 @@ function CloudflareCli(options) {
      */
     function purgeCache(options) {
         return getZone(options.domain).then(function (zone) {
-            var query = (options._[1]) ? {files : [options._[1]]} :  {purge_everything : true};
+            var query = (options._[1]) ? {files: [options._[1]]} : {purge_everything: true};
             return client.deleteCache(zone, query);
         });
     }
-    
+
     /**
      *
      * @param zoneName {String}
@@ -153,5 +211,13 @@ function CloudflareCli(options) {
     }
 }
 
+/**
+ *
+ * @param messages
+ * @constructor
+ */
+function Result(messages) {
+    this.messages = messages;
+}
 
 module.exports = CloudflareCli;
