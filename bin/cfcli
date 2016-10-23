@@ -3,8 +3,8 @@
     var allowedOptions = require('./../lib/options');
     var CloudflareCli = require('./../index');
     var ConfigReader = require('./../lib/configReader');
-    var config =  new ConfigReader().readConfig('~/.cfcli.yml');
-    var argv = _.extend(config, require('minimist')(process.argv.slice(2), allowedOptions));
-    var cli = new CloudflareCli(argv);
-
-    cli.runCommand(argv._[0], argv);
+    var argv = require('minimist')(process.argv.slice(2), allowedOptions);
+    var config =  new ConfigReader('~/.cfcli.yml').readConfig(argv.account);
+    var params = _.extend(config, argv);
+    var cli = new CloudflareCli(params);
+    cli.runCommand(argv._[0], params);
