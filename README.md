@@ -59,7 +59,6 @@ OPTIONS:
     -a  --activate  Activate cloudflare after creating record (for addrecord)
     -f  --format    Format when printing records (csv or table)
     -t  --type      Type of record (for dns record functions)
-    -p  --priority  Set priority when adding a record (MX or SRV)
     -l  --ttl       Set ttl on add or edit (120 - 86400 seconds, or 1 for auto)
     -h  --help      Display help
 
@@ -74,6 +73,8 @@ COMMANDS:
         Edit a DNS record.
     enable <name> [content]
         Enable cloudflare caching for given record and optionally specific value
+    find <name> [content]
+        Find a record with given name and optionally specific value
     ls
         List dns records for the domain
     purge [url]

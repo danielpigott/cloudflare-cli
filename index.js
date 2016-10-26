@@ -184,6 +184,7 @@ function CloudflareCli(options) {
   /**
    * Enable proxying/caching for given record
    * @param options
+   * @return {Promise}
    */
   function enableProxy(options) {
     options.activate = true;
@@ -193,6 +194,7 @@ function CloudflareCli(options) {
   /**
    * Disable proxying/caching for given record
    * @param options
+   * @return {Promise}
    */
   function disableProxy(options) {
     options.activate = false;
@@ -240,7 +242,11 @@ function CloudflareCli(options) {
       });
       return Promise.all(results);
     }).then(function (results) {
-      return new Result(results);
+      var messages = _.map(results, function (row) {
+        return 'Deleted record with id ' + row.id;
+      });
+
+      return new Result(messages);
     });
   }
 
@@ -277,11 +283,21 @@ function CloudflareCli(options) {
    */
   function listRecords(options) {
     return getZone(options.domain).then(function (zone) {
-      return client.browseDNS(zone);
-    }).then(function (result) {
+      return client.browseDNS(zone, {page: 1, per_page: 50})
+        .then(function (result) {
+          var promises = [Promise.resolve(result)];
+          for (var i = 2; i <= result.totalPages; i++) {
+            promises.push(client.browseDNS(zone, {page: i, per_page: 50}));
+          }
+          return Promise.all(promises);
+        });
+    }).then(function (results) {
       var rows = [];
-      _.each(result.result, function (item) {
-        rows.push(item);
+      _.each(results, function (result) {
+        _.each(result.result, function (item) {
+          item.ttl = (item.ttl == 1) ? 'Auto' : item.ttl;
+          rows.push(item);
+        });
       });
       return new Result(rows);
     });
@@ -289,15 +305,26 @@ function CloudflareCli(options) {
 
   /**
    * List zones in the current account
+   * @return {Promise}
    */
   function listZones() {
-    return client.browseZones().then(function (result) {
-      var rows = [];
-      _.each(result.result, function (item) {
-        rows.push(_.extend(item, {planName: item.plan.name}));
+    return client.browseZones({page: 1, per_page: 50})
+      .then(function (result) {
+        var promises = [Promise.resolve(result)];
+        for (var i = 2; i <= result.totalPages; i++) {
+          promises.push(client.browseZones({page: i, per_page: 50}));
+        }
+        return Promise.all(promises);
+      })
+      .then(function (results) {
+        var rows = [];
+        _.each(results, function (result) {
+          _.each(result.result, function (item) {
+            rows.push(_.extend(item, {planName: item.plan.name}));
+          })
+        });
+        return new Result(rows);
       });
-      return new Result(rows);
-    });
   }
 
   /**
@@ -341,9 +368,10 @@ function CloudflareCli(options) {
 
   /**
    * Display Help
+   * @return {Promise}
    */
   function showHelp() {
-    console.log(fs.readFileSync(__dirname + '/doc/help.txt', 'utf8'));
+    return Promise.resolve(fs.readFileSync(__dirname + '/doc/help.txt', 'utf8'));
   }
 
   /**
