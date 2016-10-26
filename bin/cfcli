@@ -4,7 +4,13 @@
     var CloudflareCli = require('./../index');
     var ConfigReader = require('./../lib/configReader');
     var argv = require('minimist')(process.argv.slice(2), allowedOptions);
-    var config =  new ConfigReader('~/.cfcli.yml').readConfig(argv.account);
+    var configFile = argv.config || '~/.cfcli.yml';
+    try {
+        var config = new ConfigReader(configFile).readConfig(argv.account);
+    } catch (error) {
+        console.log(error.message);
+        process.exit(1);
+    }
     var params = _.extend(config, argv);
     var cli = new CloudflareCli(params);
     cli.runCommand(argv._[0], params);

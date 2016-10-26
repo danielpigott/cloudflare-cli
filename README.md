@@ -3,6 +3,9 @@ cloudflare-cli
 
 CLI for interacting with Cloudflare
 
+**Note:**
+All commands from version 1 should work as before as they have aliases set e.g. addrecord is aliased to add
+
 ## Installation
 `npm install -g cloudflare-cli`
 
@@ -61,60 +64,58 @@ OPTIONS:
     -h  --help      Display help
 
 COMMANDS:
-    addrecord <name> <content>
+    add <name> <content>
         Add a DNS record. Use -a to activate cf after creation
     devmode on|off
         Toggle development mode on/off
-    disablecf <name> [content]
+    disable <name> [content]
         Disable cloudflare caching for given record and optionally specific value
-    editrecord <name> <content>
+    edit <name> <content>
         Edit a DNS record.
-    enablecf <name> [content]
+    enable <name> [content]
         Enable cloudflare caching for given record and optionally specific value
-    listdomains
-        List domains in your cloudflare account
-    listrecords
+    ls
         List dns records for the domain
-    purgecache
-        Clear all cache files for the domain
-    purgefile <url>
-        Purge file at given url
-    removerecord <name> [content]
+    purge [url]
+        Purge file at given url or all files if no url given
+    rm <name> [content]
         Remove record with given name and optionally specific value
+    zones
+        List domains in your cloudflare account
 ```
 
 ### Examples
 Add a new A record (mail) and activate cloudflare (-a)
 ```
-cfcli -a -t A addrecord mail 127.0.0.1
+cfcli -a -t A add mail 8.8.8.8 
 ```
 
 Edit a record (mail) and set the TTL
 ```
-cfcli --ttl 120 editrecord  mail 127.0.0.1
+cfcli --ttl 120 edit  mail 8.8.8.8
 ```
 
 Add an SRV record (then 3 numbers are priority, weight and port respectively)
 ```
-cfcli -t SRV addrecord _sip._tcp.example.com 1 1 1 example.com
+cfcli -t SRV add _sip._tcp.example.com 1 1 1 example.com
 ```
 
 Remove all records with the name test
 ```
-cfcli removerecord test
+cfcli rm test
 ```
 
 Remove record with name test and value 1.1.1.1
 ```
-cfcli removerecord test 1.1.1.1
+cfcli rm test 1.1.1.1
 ```
 Enable cloudflare for any records that match test
 ```
-cfcli enablecf test
+cfcli enable test
 ```
 Enable cloudflare for a record test with the value test.com
 ```
-cfcli enablecf test test.com
+cfcli enable test test.com
 ```
 
 Export domain records for test.com to csv
@@ -124,7 +125,7 @@ cfcli -d test.com -f csv listrecords > test.csv
 
 Purge a single file from cache
 ```
-cfcli purgefile http://test.com/script.js
+cfcli -d test.com purge http://test.com/script.js
 ```
 
 Enable dev mode for test.com domain
