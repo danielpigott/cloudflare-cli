@@ -140,7 +140,7 @@ function CloudflareCli(options) {
       var opts = mapParams(cmd, options);
       fn(opts).then(function (result) {
         if (cmd.formatter) {
-          cmd.formatter.format(result.messages);
+          cmd.formatter.format(result.messages, options);
         } else {
           console.log(result);
         }
