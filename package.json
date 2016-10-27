@@ -1,6 +1,6 @@
 {
     "name": "cloudflare-cli",
-    "version" : "2.0.1",
+    "version" : "2.0.2",
     "description" : "A command line interface for interacting with cloudflare",
     "keywords" : ["cloudflare", "cfcli"],
     "license" : "MIT",
@@ -17,7 +17,8 @@
     },
     "files": [
       "index.js",
-      "lib"
+      "lib",
+      "bin"
     ],
     "preferGlobal": true,
     "dependencies" : {
