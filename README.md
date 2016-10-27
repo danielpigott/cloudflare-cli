@@ -1,5 +1,6 @@
 cloudflare-cli
 ==============
+[![npm version](https://badge.fury.io/js/cloudflare-cli.svg)](https://badge.fury.io/js/cloudflare-cli)
 
 CLI for interacting with Cloudflare
 
