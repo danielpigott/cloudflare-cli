@@ -227,8 +227,7 @@ function CloudflareCli(options) {
       options = mapRecordOptions(options);
       if (records.count == 0) {
         throw new Error('No matching records found');
-      }
-      if (records.count == 1) {
+      } else if (records.count == 1) {
         var record = records.result[0];
         _.each(allowedProperties, function (property) {
           if (options[property] !== undefined) {
@@ -236,8 +235,14 @@ function CloudflareCli(options) {
           }
         });
         return client.editDNS(record);
+      } else {
+        throw new Error(format('%d matching records found, unable to update', records.count));
       }
-    })
+    }).then(function(record) {
+      return new Result([
+        format('Updated %s record %s (id: %s)', record.type, record.name, record.id)
+      ]);
+    });
   }
 
   /**
