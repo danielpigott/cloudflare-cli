@@ -38,21 +38,24 @@ function CloudflareCli(options) {
       callback: disableProxy,
       description: 'Enable cloudflare caching for given record',
       params: ['name'],
-      optionalParams: ['content']
+      optionalParams: ['content'],
+      formatter: new formatters.MessageFormatter()
     },
     edit: {
       aliases: ['edit', 'editrecord'],
       callback: editRecord,
       description: 'Edit a DNS record',
       params: ['name', 'content'],
-      optionalParams: []
+      optionalParams: [],
+      formatter: new formatters.MessageFormatter()
     },
     enable: {
       aliases: ['enable', 'enablecf'],
       callback: enableProxy,
       description: 'Enable cloudflare caching for given record',
       params: ['name'],
-      optionalParams: ['content']
+      optionalParams: ['content'],
+      formatter: new formatters.MessageFormatter()
     },
     find: {
       aliases: ['find'],
@@ -71,7 +74,8 @@ function CloudflareCli(options) {
       shortcut: 'h',
       params: [],
       callback: showHelp,
-      description: 'Show help'
+      description: 'Show help',
+      formatter: new formatters.MessageFormatter()
     },
     purge: {
       aliases: ['purge', 'purgefile', 'purgecache'],
@@ -113,7 +117,17 @@ function CloudflareCli(options) {
   };
 
   self.runCommand = runCommand;
+  self.addRecord = addRecord;
+  self.disableProxy = disableProxy;
+  self.editRecord = editRecord;
+  self.enableProxy = enableProxy;
+  self.findRecord = findRecord;
+  self.listRecords = listRecords;
+  self.listZones = listZones;
+  self.purgeCache = purgeCache;
+  self.removeRecord = removeRecord;
   self.showHelp = showHelp;
+  self.toggleDevMode = toggleDevMode;
 
   init(options);
 
@@ -371,7 +385,7 @@ function CloudflareCli(options) {
    * @return {Promise}
    */
   function showHelp() {
-    return Promise.resolve(fs.readFileSync(__dirname + '/doc/help.txt', 'utf8'));
+    return Promise.resolve(new Result([fs.readFileSync(__dirname + '/doc/help.txt', 'utf8')]));
   }
 
   /**
