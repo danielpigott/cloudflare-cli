@@ -13,28 +13,28 @@ OPTIONS:
     -a  --activate  Activate cloudflare after creating record (for addrecord)
     -f  --format    Format when printing records (csv or table)
     -t  --type      Type of record (for dns record functions)
-    -p  --priority  Set priority on add record (MX or SRV)
+    -p  --priority  Set priority when adding a record (MX or SRV)
     -l  --ttl       Set ttl on add or edit (120 - 86400 seconds, or 1 for auto)
     -h  --help      Display help
 
 COMMANDS:
-    addrecord <name> <content>
+    add <name> <content>
         Add a DNS record. Use -a to activate cf after creation
     devmode on|off
         Toggle development mode on/off
-    disablecf <name>
-        Disable cloudflare caching for given record
-    editrecord <name> <content>
+    disable <name> [content]
+        Disable cloudflare caching for given record and optionally specific value
+    edit <name> <content>
         Edit a DNS record.
-    enablecf <name>
-        Enable cloudflare caching for given record
-    listdomains
-        List domains in your cloudflare account
-    listrecords
+    enable <name> [content]
+        Enable cloudflare caching for given record and optionally specific value
+    find <name> [content]
+        Find a record with given name and optionally specific value
+    ls
         List dns records for the domain
-    purgecache
-        Clear all cache files for the domain
-    purgefile <url>
-        Purge file at given url
-    removerecord <name> [content]
-        Remove record with given name and optionally a specific value
+    purge [url]
+        Purge file at given url or all files if no url given
+    rm <name> [content]
+        Remove record with given name and optionally specific value
+    zones
+        List domains in your cloudflare account
