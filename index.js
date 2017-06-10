@@ -149,7 +149,9 @@ function CloudflareCli(options) {
    */
   function runCommand(command, options) {
     var cmd = getCommand(command);
-    if (cmd) {
+    if (!cmd) {
+      cmd = getCommand('help');
+    }
       var fn = cmd.callback;
       var opts = mapParams(cmd, options);
       fn(opts).then(function (result) {
@@ -164,7 +166,6 @@ function CloudflareCli(options) {
         formatter.format(['Error: ' + error.message]);
         process.exit(1);
       });
-    }
   }
 
   /**
@@ -173,10 +174,11 @@ function CloudflareCli(options) {
    * @return {*}
    */
   function addRecord(options) {
+    options.type = options.type || 'CNAME';
     return getZone(options.domain).then(
       function (zone) {
         return CFClient.DNSRecord.create(
-          _.extend({zoneId: zone.id}, mapRecordOptions(options)));
+          _.extend({zoneId: zone.id, ttl: 1, priority: 0}, mapRecordOptions(options)));
       })
       .then(function (record) {
         return client.addDNS(record);
@@ -221,13 +223,13 @@ function CloudflareCli(options) {
    * @returns {Promise}
    */
   function editRecord(options) {
-    return find(options.domain, {'name': options.name}).then(function (records) {
+    return find(options.domain, getQueryParams(options, ['name','type', 'content'])).then(function (records) {
       //Properties that are editable
       var allowedProperties = ['content', 'ttl', 'proxied'];
       options = mapRecordOptions(options);
-      if (records.count == 0) {
+      if (records.count === 0) {
         throw new Error('No matching records found');
-      } else if (records.count == 1) {
+      } else if (records.count === 1) {
         var record = records.result[0];
         _.each(allowedProperties, function (property) {
           if (options[property] !== undefined) {
@@ -250,9 +252,10 @@ function CloudflareCli(options) {
    * @param options
    */
   function removeRecord(options) {
-    var query = _(options).pick(['name', 'content']).omitBy(_.isUndefined).value();
+    var query = getQueryParams(options, ['name', 'content', 'type']);
+    console.log(query);
     return find(options.domain, query).then(function (records) {
-      if (records.count == 0) {
+      if (records.count === 0) {
         throw new Error('No matching records found');
       }
       var results = [];
@@ -275,7 +278,8 @@ function CloudflareCli(options) {
    * @returns {Promise}
    */
   function findRecord(options) {
-    return find(options.domain, {'name': options.name}).then(function (result) {
+    var query = getQueryParams(options, ['name', 'content', 'type']);
+    return find(options.domain, query).then(function (result) {
       return new Result(result.result);
     });
   }
@@ -314,7 +318,7 @@ function CloudflareCli(options) {
       var rows = [];
       _.each(results, function (result) {
         _.each(result.result, function (item) {
-          item.ttl = (item.ttl == 1) ? 'Auto' : item.ttl;
+          item.ttl = (item.ttl === 1) ? 'Auto' : item.ttl;
           rows.push(item);
         });
       });
@@ -352,7 +356,7 @@ function CloudflareCli(options) {
    */
   function toggleDevMode(options) {
     return getZone(options.domain).then(function (zone) {
-      zone.devMode = (options.mode == 'on');
+      zone.devMode = (options.mode === 'on');
       return client.editZone(zone);
 
     }).then(function (result) {
@@ -367,7 +371,7 @@ function CloudflareCli(options) {
    */
   function purgeCache(options) {
     return getZone(options.domain).then(function (zone) {
-      var query = (options._[1]) ? {files: [options._[1]]} : {purge_everything: true};
+      var query = (options._[1]) ? {files: options._.slice(1)} : {purge_everything: true};
       return client.deleteCache(zone, query);
     }).then(function (result) {
       return new Result({result: result});
@@ -424,7 +428,7 @@ function CloudflareCli(options) {
    * @return {*}
    */
   function mapRecordOptions(options) {
-    if (options.type == 'SRV') {
+    if (options.type === 'SRV') {
       var contentParts = options.content.split(' ');
       var serverParts = options.name.split('.');
       options.data = {
@@ -437,13 +441,16 @@ function CloudflareCli(options) {
         target: contentParts[3]
       }
     }
-    options.ttl = options.ttl || 1;
-    options.priority = options.priority || 0;
     if (options.activate !== undefined) {
       options.proxied = options.activate;
     }
 
     return options;
+  }
+
+  function getQueryParams(options, allowed)
+  {
+      return _(options).pick(allowed).omitBy(_.isUndefined).value();
   }
 }
 

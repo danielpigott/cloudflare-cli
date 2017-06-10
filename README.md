@@ -79,8 +79,8 @@ COMMANDS:
         Find a record with given name and optionally specific value
     ls
         List dns records for the domain
-    purge [url]
-        Purge file at given url or all files if no url given
+    purge [urls]
+        Purge file at given urls (space separated) or all files if no url given
     rm <name> [content]
         Remove record with given name and optionally specific value
     zones
@@ -126,9 +126,9 @@ Export domain records for test.com to csv
 cfcli -d test.com -f csv listrecords > test.csv
 ```
 
-Purge a single file from cache
+Purge a given files from cache
 ```
-cfcli -d test.com purge http://test.com/script.js
+cfcli -d test.com purge http://test.com/script.js http://test.com/styles.css
 ```
 
 Enable dev mode for test.com domain

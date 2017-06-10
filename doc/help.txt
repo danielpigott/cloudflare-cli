@@ -32,8 +32,8 @@ COMMANDS:
         Find a record with given name and optionally specific value
     ls
         List dns records for the domain
-    purge [url]
-        Purge file at given url or all files if no url given
+    purge [urls]
+        Purge file at given urls (space separated) or all files if no url given
     rm <name> [content]
         Remove record with given name and optionally specific value
     zones
