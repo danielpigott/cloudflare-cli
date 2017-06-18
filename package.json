@@ -1,6 +1,6 @@
 {
     "name": "cloudflare-cli",
-    "version" : "2.0.3",
+    "version" : "2.1.0",
     "description" : "A command line interface for interacting with cloudflare",
     "keywords" : ["cloudflare", "cfcli"],
     "license" : "MIT",
@@ -25,8 +25,8 @@
     "dependencies" : {
       "minimist": "~1.2.0",
       "cloudflare": "~1.1.1",
-      "lodash": "~4.13.1",
-      "js-yaml": "~3.6.1",
+      "lodash": "~4.17.4",
+      "js-yaml": "~3.8.4",
       "cli-table": "~0.3.1"
     }
 }
