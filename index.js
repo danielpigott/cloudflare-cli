@@ -7,10 +7,13 @@ function CloudflareCli(options) {
   var self = this;
   var _ = require('lodash');
   var CFClient = require('cloudflare');
+  var CloudFlareAPI = require('cloudflare4');
   var fs = require('fs');
   var format = require('util').format;
   var formatters = require('./lib/formatters');
   var client;
+  var apiClient;
+
   /**
    * Available commands
    * @type {Object}
@@ -140,6 +143,10 @@ function CloudflareCli(options) {
       email: options.email,
       key: options.token
     });
+    apiClient = new CloudFlareAPI({
+      email: options.email,
+      key: options.token
+    });
   }
 
   /**
@@ -152,20 +159,20 @@ function CloudflareCli(options) {
     if (!cmd) {
       cmd = getCommand('help');
     }
-      var fn = cmd.callback;
-      var opts = mapParams(cmd, options);
-      fn(opts).then(function (result) {
-        if (cmd.formatter) {
-          cmd.formatter.format(result.messages, options);
-        } else {
-          console.log(result);
-        }
-        process.exit();
-      }).catch(function (error) {
-        var formatter = new formatters.MessageFormatter();
-        formatter.format(['Error: ' + error.message]);
-        process.exit(1);
-      });
+    var fn = cmd.callback;
+    var opts = mapParams(cmd, options);
+    fn(opts).then(function (result) {
+      if (cmd.formatter) {
+        cmd.formatter.format(result.messages, options);
+      } else {
+        console.log(result);
+      }
+      process.exit();
+    }).catch(function (error) {
+      var formatter = new formatters.MessageFormatter();
+      formatter.format(['Error: ' + error.message]);
+      process.exit(1);
+    });
   }
 
   /**
@@ -223,7 +230,7 @@ function CloudflareCli(options) {
    * @returns {Promise}
    */
   function editRecord(options) {
-    return find(options.domain, getQueryParams(options, ['name','type', 'content'])).then(function (records) {
+    return find(options.domain, getQueryParams(options, ['name', 'type', 'content'])).then(function (records) {
       //Properties that are editable
       var allowedProperties = ['content', 'ttl', 'proxied'];
       options = mapRecordOptions(options);
@@ -240,7 +247,7 @@ function CloudflareCli(options) {
       } else {
         throw new Error(format('%d matching records found, unable to update', records.count));
       }
-    }).then(function(record) {
+    }).then(function (record) {
       return new Result([
         format('Updated %s record %s (id: %s)', record.type, record.name, record.id)
       ]);
@@ -253,7 +260,6 @@ function CloudflareCli(options) {
    */
   function removeRecord(options) {
     var query = getQueryParams(options, ['name', 'content', 'type']);
-    console.log(query);
     return find(options.domain, query).then(function (records) {
       if (records.count === 0) {
         throw new Error('No matching records found');
@@ -356,11 +362,16 @@ function CloudflareCli(options) {
    */
   function toggleDevMode(options) {
     return getZone(options.domain).then(function (zone) {
-      zone.devMode = (options.mode === 'on');
-      return client.editZone(zone);
+      //Use alternate api client
+      return apiClient.zoneSettingsDevelopmentModeUpdate(
+        zone.id,
+        {
+          value: options.mode
+        }
+      );
 
-    }).then(function (result) {
-      return new Result([result]);
+    }).then(function () {
+      return new Result(['Dev mode changed to ' + options.mode]);
     })
   }
 
@@ -448,9 +459,8 @@ function CloudflareCli(options) {
     return options;
   }
 
-  function getQueryParams(options, allowed)
-  {
-      return _(options).pick(allowed).omitBy(_.isUndefined).value();
+  function getQueryParams(options, allowed) {
+    return _(options).pick(allowed).omitBy(_.isUndefined).value();
   }
 }
 
