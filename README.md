@@ -42,6 +42,13 @@ accounts:
 
 You can then use `-u play` to interact with the second cloudflare account.
 
+### Environment Variables
+If you have the below environment variables set, they will be used in preference to your config file:
+```
+    CF_API_KEY # maps to token
+    CF_API_EMAIL # maps to email
+```
+
 ## Usage
 
 ```
