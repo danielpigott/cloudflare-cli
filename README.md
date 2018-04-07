@@ -61,6 +61,7 @@ OPTIONS:
     -f  --format    Format when printing records (csv or table)
     -t  --type      Type of record (for dns record functions)
     -p  --priority  Set priority when adding a record (MX or SRV)
+    -q  --query     Comma separated filters to use when finding a record
     -l  --ttl       Set ttl on add or edit (120 - 86400 seconds, or 1 for auto)
     -h  --help      Display help
 
@@ -103,19 +104,26 @@ Add an SRV record (then 3 numbers are priority, weight and port respectively)
 cfcli -t SRV add _sip._tcp.example.com 1 1 1 example.com
 ```
 
+Find all records matching the content value test.com
+```
+cfcli find -q content:test.com
+```
+
 Remove all records with the name test
 ```
 cfcli rm test
 ```
 
-Remove record with name test and value 1.1.1.1
+Remove record with name test, type of A and value 1.1.1.1
 ```
-cfcli rm test 1.1.1.1
+cfcli rm test -q content:1.1.1.1,type:A
 ```
+
 Enable cloudflare for any records that match test
 ```
 cfcli enable test
 ```
+
 Enable cloudflare for a record test with the value test.com
 ```
 cfcli enable test test.com

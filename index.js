@@ -230,7 +230,7 @@ function CloudflareCli(options) {
    * @returns {Promise}
    */
   function editRecord(options) {
-    return find(options.domain, getQueryParams(options, ['name', 'type', 'content'])).then(function (records) {
+    return find(options.domain, getQueryParams(options, ['name', 'type', 'query'])).then(function (records) {
       //Properties that are editable
       var allowedProperties = ['content', 'ttl', 'proxied'];
       options = mapRecordOptions(options);
@@ -259,7 +259,7 @@ function CloudflareCli(options) {
    * @param options
    */
   function removeRecord(options) {
-    var query = getQueryParams(options, ['name', 'content', 'type']);
+    var query = getQueryParams(options, ['name', 'content', 'type', 'query']);
     return find(options.domain, query).then(function (records) {
       if (records.count === 0) {
         throw new Error('No matching records found');
@@ -279,12 +279,12 @@ function CloudflareCli(options) {
   }
 
   /**
-   *
+   * Find command
    * @param options
    * @returns {Promise}
    */
   function findRecord(options) {
-    var query = getQueryParams(options, ['name', 'content', 'type']);
+    var query = getQueryParams(options, ['name', 'content', 'type', 'query']);
     return find(options.domain, query).then(function (result) {
       return new Result(result.result);
     });
@@ -297,8 +297,12 @@ function CloudflareCli(options) {
    * @return {Promise}
    */
   function find(domain, query) {
-    if (!query.name.includes(domain)) {
+    if (query.name && !query.name.includes(domain)) {
       query.name = query.name + '.' + domain;
+    }
+    if (query.query) {
+      query = _.extend(query, query.query);
+      delete query.query;
     }
     return getZone(domain).then(function (zone) {
       return client.browseDNS(zone, query);
@@ -426,9 +430,22 @@ function CloudflareCli(options) {
    * @return {Object}
    */
   function mapParams(cmd, params) {
+    var query = [];
     if (cmd.mergeAdditionalParams) {
       var paramCount = cmd.params.length + cmd.optionalParams.length;
       params._[paramCount] = _.slice(params._, paramCount).join(' ');
+    }
+    //Process query option
+    if (params.query) {
+      query = params.query.split(',');
+      params.query = _.fromPairs(
+        _.map(query,
+          function (filter) {
+            return filter.split(':');
+          }
+        )
+      );
+
     }
     return _.extend(params, _.fromPairs(_.zip(cmd.params.concat(cmd.optionalParams), _.drop(params._, 1))));
   }
@@ -459,6 +476,11 @@ function CloudflareCli(options) {
     return options;
   }
 
+  /**
+   *
+   * @param options
+   * @param allowed
+   */
   function getQueryParams(options, allowed) {
     return _(options).pick(allowed).omitBy(_.isUndefined).value();
   }
