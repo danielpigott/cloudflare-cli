@@ -1,15 +1,16 @@
 {
   "name": "cloudflare-cli",
-  "version": "2.3.0",
+  "version": "2.4.0",
   "description": "A command line interface for interacting with cloudflare",
+  "homepage": "https://github.com/danielpigott/cloudflare-cli",
+  "bugs": {
+    "url": "https://github.com/danielpigott/cloudflare-cli/issues"
+  },
   "keywords": [
     "cloudflare",
     "cfcli"
   ],
   "license": "MIT",
-  "bin": {
-    "cfcli": "./bin/cfcli"
-  },
   "author": {
     "name": "Daniel Pigott",
     "email": "pigottd@gmail.com"
@@ -24,6 +25,10 @@
     "bin",
     "doc"
   ],
+  "main": "index.js",
+  "bin": {
+    "cfcli": "./bin/cfcli"
+  },
   "preferGlobal": true,
   "dependencies": {
     "cli-table": "~0.3.1",

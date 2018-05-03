@@ -11,7 +11,7 @@ OPTIONS:
     -u  --account   Choose one of your named cloudflare accounts from .cfcli.yml
     -d  --domain    Domain to operate on
     -a  --activate  Activate cloudflare after creating record (for addrecord)
-    -f  --format    Format when printing records (csv or table)
+    -f  --format    Format when printing records (csv,json or table)
     -t  --type      Type of record (for dns record functions)
     -p  --priority  Set priority when adding a record (MX or SRV)
     -q  --query     Comma separated filters to use when finding a record
