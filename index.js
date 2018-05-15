@@ -5,8 +5,10 @@
  */
 function CloudflareCli(options) {
   var self = this;
+  self.email = null;
+  self.key = null;
   var _ = require('lodash');
-  var CFClient = require('cloudflare');
+  var CfClient = require('cloudflare');
   var CloudFlareAPI = require('cloudflare4');
   var fs = require('fs');
   var format = require('util').format;
@@ -139,7 +141,9 @@ function CloudflareCli(options) {
    * @param options
    */
   function init(options) {
-    client = new CFClient({
+    self.email = options.email;
+    self.key = options.key;
+    client = new CfClient({
       email: options.email,
       key: options.token
     });
@@ -184,7 +188,7 @@ function CloudflareCli(options) {
     options.type = options.type || 'CNAME';
     return getZone(options.domain).then(
       function (zone) {
-        return CFClient.DNSRecord.create(
+        return CfClient.DNSRecord.create(
           _.extend({zoneId: zone.id, ttl: 1, priority: 0}, mapRecordOptions(options)));
       })
       .then(function (record) {

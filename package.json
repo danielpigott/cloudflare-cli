@@ -29,6 +29,9 @@
   "bin": {
     "cfcli": "./bin/cfcli"
   },
+  "scripts": {
+    "test": "mocha"
+  },
   "preferGlobal": true,
   "dependencies": {
     "cli-table": "~0.3.1",
@@ -37,5 +40,8 @@
     "js-yaml": "~3.8.4",
     "lodash": "~4.17.4",
     "minimist": "~1.2.0"
+  },
+  "devDependencies": {
+    "mocha": "^5.1.1"
   }
 }
