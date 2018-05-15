@@ -31,7 +31,7 @@
   },
   "scripts": {
     "test": "mocha",
-    "test-ci": "MOCHA_FILE=junit/mocha.xml mocha --reporter mocha-junit-reporter  "
+    "test-ci": "MOCHA_FILE=$JUNIT_REPORT_PATH/mocha.xml mocha --reporter mocha-junit-reporter"
   },
   "preferGlobal": true,
   "dependencies": {

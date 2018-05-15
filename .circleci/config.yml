@@ -27,7 +27,10 @@ jobs:
           key: v1-dependencies-{{ checksum "package.json" }}
 
       - run: mkdir ~/junit
-      - run: yarn test-ci
+      - run:
+          command: yarn test-ci
+          environment:
+            JUNIT_REPORT_PATH: /home/circleci/junit/
       - store_test_results:
           path: ~/junit
       - store_artifacts:
