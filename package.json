@@ -30,7 +30,8 @@
     "cfcli": "./bin/cfcli"
   },
   "scripts": {
-    "test": "mocha"
+    "test": "mocha",
+    "test-ci": "MOCHA_FILE=junit/mocha.xml mocha --reporter mocha-junit-reporter  "
   },
   "preferGlobal": true,
   "dependencies": {
