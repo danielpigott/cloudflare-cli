@@ -7,13 +7,13 @@ function CloudflareCli(options) {
   var self = this;
   self.email = null;
   self.key = null;
+  self.perPage = 50;
   var _ = require('lodash');
-  var CfClient = require('cloudflare');
   var CloudFlareAPI = require('cloudflare4');
+  var CloudFlareClient = require('./lib/apiClient');
   var fs = require('fs');
   var format = require('util').format;
   var formatters = require('./lib/formatters');
-  var client;
   var apiClient;
 
   /**
@@ -142,15 +142,12 @@ function CloudflareCli(options) {
    */
   function init(options) {
     self.email = options.email;
-    self.key = options.key;
-    client = new CfClient({
-      email: options.email,
-      key: options.token
-    });
+    self.key = options.token;
     apiClient = new CloudFlareAPI({
       email: options.email,
       key: options.token
     });
+    self.cloudflareClient = new CloudFlareClient(options.email, options.token);
   }
 
   /**
@@ -186,21 +183,20 @@ function CloudflareCli(options) {
    */
   function addRecord(options) {
     options.type = options.type || 'CNAME';
-    return getZone(options.domain).then(
-      function (zone) {
-        return CfClient.DNSRecord.create(
-          _.extend({zoneId: zone.id, ttl: 1, priority: 0}, mapRecordOptions(options)));
+    return getZone(options.domain)
+      .then(function (zone) {
+        return self.cloudflareClient.addRecord(
+          zone.id,
+          _.extend({ttl: 1}, mapRecordOptions(options)));
       })
-      .then(function (record) {
-        return client.addDNS(record);
-      }).then(function (newRecord) {
+      .then(function (response) {
           return new Result(
             [
               format(
                 'Added %s record %s -> %s',
-                newRecord.type,
-                newRecord.name,
-                newRecord.content
+                response.data.result.type,
+                response.data.result.name,
+                response.data.result.content
               )
             ]
           );
@@ -234,24 +230,21 @@ function CloudflareCli(options) {
    * @returns {Promise}
    */
   function editRecord(options) {
-    return find(options.domain, getQueryParams(options, ['name', 'type', 'query'])).then(function (records) {
+    return find(options.domain, getQueryParams(options, ['name', 'type', 'query'])).then(function (response) {
+      const records = response.data.result;
       //Properties that are editable
-      var allowedProperties = ['content', 'ttl', 'proxied'];
       options = mapRecordOptions(options);
-      if (records.count === 0) {
+      if (records.length === 0) {
         throw new Error('No matching records found');
-      } else if (records.count === 1) {
-        var record = records.result[0];
-        _.each(allowedProperties, function (property) {
-          if (options[property] !== undefined) {
-            record[property] = options[property];
-          }
-        });
-        return client.editDNS(record);
+      } else if (records.length === 1) {
+        var record = records[0];
+        options.type = options.type || record.type;
+        return self.cloudflareClient.editRecord(record.zone_id, record.id, options);
       } else {
         throw new Error(format('%d matching records found, unable to update', records.count));
       }
-    }).then(function (record) {
+    }).then(function (response) {
+      let record  = response.data.result;
       return new Result([
         format('Updated %s record %s (id: %s)', record.type, record.name, record.id)
       ]);
@@ -264,18 +257,19 @@ function CloudflareCli(options) {
    */
   function removeRecord(options) {
     var query = getQueryParams(options, ['name', 'content', 'type', 'query']);
-    return find(options.domain, query).then(function (records) {
-      if (records.count === 0) {
+    return find(options.domain, query).then(function (response) {
+      let records = response.data.result;
+      if (records.length === 0) {
         throw new Error('No matching records found');
       }
       var results = [];
-      _.each(records.result, function (record) {
-        results.push(client.deleteDNS(record));
+      _.each(records, function (record) {
+        results.push(self.cloudflareClient.removeRecord(record.zone_id, record.id));
       });
       return Promise.all(results);
-    }).then(function (results) {
-      var messages = _.map(results, function (row) {
-        return 'Deleted record with id ' + row.id;
+    }).then(function (responses) {
+      var messages = _.map(responses, function (response) {
+        return 'Deleted record with id ' + response.data.result.id;
       });
 
       return new Result(messages);
@@ -290,7 +284,7 @@ function CloudflareCli(options) {
   function findRecord(options) {
     var query = getQueryParams(options, ['name', 'content', 'type', 'query']);
     return find(options.domain, query).then(function (result) {
-      return new Result(result.result);
+      return new Result(result.data.result);
     });
   }
 
@@ -309,7 +303,7 @@ function CloudflareCli(options) {
       delete query.query;
     }
     return getZone(domain).then(function (zone) {
-      return client.browseDNS(zone, query);
+      return self.cloudflareClient.findRecord(zone.id, query);
     });
   }
 
@@ -320,18 +314,18 @@ function CloudflareCli(options) {
    */
   function listRecords(options) {
     return getZone(options.domain).then(function (zone) {
-      return client.browseDNS(zone, {page: 1, per_page: 50})
-        .then(function (result) {
-          var promises = [Promise.resolve(result)];
-          for (var i = 2; i <= result.totalPages; i++) {
-            promises.push(client.browseDNS(zone, {page: i, per_page: 50}));
+      return self.cloudflareClient.findRecord(zone.id, {page: 1, per_page: self.perPage})
+        .then(function (response) {
+          var promises = [Promise.resolve(response)];
+          for (var i = 2; i <= response.data['result_info']['total_pages']; i++) {
+            promises.push(self.cloudflareClient.findRecord(zone.id, {page: i, per_page: self.perPage}));
           }
           return Promise.all(promises);
         });
-    }).then(function (results) {
+    }).then(function (responses) {
       var rows = [];
-      _.each(results, function (result) {
-        _.each(result.result, function (item) {
+      _.each(responses, function (response) {
+        _.each(response.data.result, function (item) {
           item.ttl = (item.ttl === 1) ? 'Auto' : item.ttl;
           rows.push(item);
         });
@@ -345,18 +339,18 @@ function CloudflareCli(options) {
    * @return {Promise}
    */
   function listZones() {
-    return client.browseZones({page: 1, per_page: 50})
-      .then(function (result) {
-        var promises = [Promise.resolve(result)];
-        for (var i = 2; i <= result.totalPages; i++) {
-          promises.push(client.browseZones({page: i, per_page: 50}));
+    return self.cloudflareClient.findZones({page: 1, per_page: self.perPage})
+      .then(function (response) {
+        var promises = [Promise.resolve(response)];
+        for (var i = 2; i <= response.data['result_info']['total_pages']; i++) {
+          promises.push(self.cloudflareClient.findZones({page: i, per_page: self.perPage}));
         }
         return Promise.all(promises);
       })
-      .then(function (results) {
+      .then(function (responses) {
         var rows = [];
-        _.each(results, function (result) {
-          _.each(result.result, function (item) {
+        _.each(responses, function (response) {
+          _.each(response.data.result, function (item) {
             rows.push(_.extend(item, {planName: item.plan.name}));
           })
         });
@@ -391,9 +385,9 @@ function CloudflareCli(options) {
   function purgeCache(options) {
     return getZone(options.domain).then(function (zone) {
       var query = (options._[1]) ? {files: options._.slice(1)} : {purge_everything: true};
-      return client.deleteCache(zone, query);
-    }).then(function (result) {
-      return new Result({result: result});
+      return self.cloudflareClient.purgeCache(zone.id, query);
+    }).then(function () {
+      return new Result('Purged cache successfully');
     });
   }
 
@@ -403,8 +397,8 @@ function CloudflareCli(options) {
    * @returns {Promise}
    */
   function getZone(zoneName) {
-    return client.browseZones({name: zoneName}).then(function (result) {
-      return result.result[0];
+    return self.cloudflareClient.findZones({name: zoneName}).then(function (response) {
+      return response.data.result[0];
     });
   }
 
@@ -435,7 +429,7 @@ function CloudflareCli(options) {
    */
   function mapParams(cmd, params) {
     var query = [];
-    if (cmd.mergeAdditionalParams) {
+    if (cmd.mergeAdditionalParams && params._ !== undefined) {
       var paramCount = cmd.params.length + cmd.optionalParams.length;
       params._[paramCount] = _.slice(params._, paramCount).join(' ');
     }
@@ -476,6 +470,7 @@ function CloudflareCli(options) {
     if (options.activate !== undefined) {
       options.proxied = options.activate;
     }
+    options = _.omit(options, ['domain', 'email', 'token', '_', 'activate', 'a']);
 
     return options;
   }

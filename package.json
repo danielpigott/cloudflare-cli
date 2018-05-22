@@ -35,8 +35,8 @@
   },
   "preferGlobal": true,
   "dependencies": {
+    "axios": "^0.18.0",
     "cli-table": "~0.3.1",
-    "cloudflare": "~1.1.1",
     "cloudflare4": "^0.2.5",
     "js-yaml": "~3.8.4",
     "lodash": "~4.17.4",
@@ -44,6 +44,10 @@
   },
   "devDependencies": {
     "mocha": "^5.1.1",
-    "mocha-junit-reporter": "^1.17.0"
+    "mocha-junit-reporter": "^1.17.0",
+    "uuid": "^3.2.1"
+  },
+  "engines": {
+    "node": ">=4.0.0"
   }
 }
