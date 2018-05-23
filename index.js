@@ -165,7 +165,7 @@ function CloudflareCli(options) {
       process.exit();
     }).catch(function (error) {
       let formatter = new formatters.MessageFormatter();
-      formatter.format(['Error: ' + error.message]);
+      formatter.format(['Error: ' + error.response.data.errors[0].message]);
       process.exit(1);
     });
   }
@@ -184,16 +184,14 @@ function CloudflareCli(options) {
           _.extend({ttl: 1}, mapRecordOptions(options)));
       })
       .then(function (response) {
-          return new Result(
-            [
-              format(
-                'Added %s record %s -> %s',
-                response.data.result.type,
-                response.data.result.name,
-                response.data.result.content
-              )
-            ]
-          );
+          return new Result([
+            format(
+              'Added %s record %s -> %s',
+              response.data.result.type,
+              response.data.result.name,
+              response.data.result.content
+            )
+          ]);
         }
       )
   }
@@ -233,12 +231,13 @@ function CloudflareCli(options) {
       } else if (records.length === 1) {
         let record = records[0];
         options.type = options.type || record.type;
+        options.content = options.content || record.content;
         return self.cloudflareClient.editRecord(record.zone_id, record.id, options);
       } else {
         throw new Error(format('%d matching records found, unable to update', records.count));
       }
     }).then(function (response) {
-      let record  = response.data.result;
+      let record = response.data.result;
       return new Result([
         format('Updated %s record %s (id: %s)', record.type, record.name, record.id)
       ]);
