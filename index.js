@@ -1,3 +1,6 @@
+const _ = require('lodash');
+const fs = require('fs');
+
 /**
  *
  * @param options
@@ -8,9 +11,8 @@ function CloudflareCli(options) {
   self.email = null;
   self.key = null;
   self.perPage = 50;
-  let _ = require('lodash');
+
   let CloudFlareClient = require('./lib/apiClient');
-  let fs = require('fs');
   let format = require('util').format;
   let formatters = require('./lib/formatters');
 
