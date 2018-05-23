@@ -4,23 +4,21 @@
  * @constructor
  */
 function CloudflareCli(options) {
-  var self = this;
+  let self = this;
   self.email = null;
   self.key = null;
   self.perPage = 50;
-  var _ = require('lodash');
-  var CloudFlareAPI = require('cloudflare4');
-  var CloudFlareClient = require('./lib/apiClient');
-  var fs = require('fs');
-  var format = require('util').format;
-  var formatters = require('./lib/formatters');
-  var apiClient;
+  let _ = require('lodash');
+  let CloudFlareClient = require('./lib/apiClient');
+  let fs = require('fs');
+  let format = require('util').format;
+  let formatters = require('./lib/formatters');
 
   /**
    * Available commands
    * @type {Object}
    */
-  var commands = {
+  const commands = {
     add: {
       aliases: ['add', 'addrecord'],
       callback: addRecord,
@@ -143,10 +141,6 @@ function CloudflareCli(options) {
   function init(options) {
     self.email = options.email;
     self.key = options.token;
-    apiClient = new CloudFlareAPI({
-      email: options.email,
-      key: options.token
-    });
     self.cloudflareClient = new CloudFlareClient(options.email, options.token);
   }
 
@@ -156,12 +150,12 @@ function CloudflareCli(options) {
    * @param options
    */
   function runCommand(command, options) {
-    var cmd = getCommand(command);
+    let cmd = getCommand(command);
     if (!cmd) {
       cmd = getCommand('help');
     }
-    var fn = cmd.callback;
-    var opts = mapParams(cmd, options);
+    let fn = cmd.callback;
+    let opts = mapParams(cmd, options);
     fn(opts).then(function (result) {
       if (cmd.formatter) {
         cmd.formatter.format(result.messages, options);
@@ -170,7 +164,7 @@ function CloudflareCli(options) {
       }
       process.exit();
     }).catch(function (error) {
-      var formatter = new formatters.MessageFormatter();
+      let formatter = new formatters.MessageFormatter();
       formatter.format(['Error: ' + error.message]);
       process.exit(1);
     });
@@ -237,7 +231,7 @@ function CloudflareCli(options) {
       if (records.length === 0) {
         throw new Error('No matching records found');
       } else if (records.length === 1) {
-        var record = records[0];
+        let record = records[0];
         options.type = options.type || record.type;
         return self.cloudflareClient.editRecord(record.zone_id, record.id, options);
       } else {
@@ -256,19 +250,19 @@ function CloudflareCli(options) {
    * @param options
    */
   function removeRecord(options) {
-    var query = getQueryParams(options, ['name', 'content', 'type', 'query']);
+    let query = getQueryParams(options, ['name', 'content', 'type', 'query']);
     return find(options.domain, query).then(function (response) {
       let records = response.data.result;
       if (records.length === 0) {
         throw new Error('No matching records found');
       }
-      var results = [];
+      let results = [];
       _.each(records, function (record) {
         results.push(self.cloudflareClient.removeRecord(record.zone_id, record.id));
       });
       return Promise.all(results);
     }).then(function (responses) {
-      var messages = _.map(responses, function (response) {
+      let messages = _.map(responses, function (response) {
         return 'Deleted record with id ' + response.data.result.id;
       });
 
@@ -282,7 +276,7 @@ function CloudflareCli(options) {
    * @returns {Promise}
    */
   function findRecord(options) {
-    var query = getQueryParams(options, ['name', 'content', 'type', 'query']);
+    let query = getQueryParams(options, ['name', 'content', 'type', 'query']);
     return find(options.domain, query).then(function (result) {
       return new Result(result.data.result);
     });
@@ -316,14 +310,14 @@ function CloudflareCli(options) {
     return getZone(options.domain).then(function (zone) {
       return self.cloudflareClient.findRecord(zone.id, {page: 1, per_page: self.perPage})
         .then(function (response) {
-          var promises = [Promise.resolve(response)];
-          for (var i = 2; i <= response.data['result_info']['total_pages']; i++) {
+          let promises = [Promise.resolve(response)];
+          for (let i = 2; i <= response.data['result_info']['total_pages']; i++) {
             promises.push(self.cloudflareClient.findRecord(zone.id, {page: i, per_page: self.perPage}));
           }
           return Promise.all(promises);
         });
     }).then(function (responses) {
-      var rows = [];
+      let rows = [];
       _.each(responses, function (response) {
         _.each(response.data.result, function (item) {
           item.ttl = (item.ttl === 1) ? 'Auto' : item.ttl;
@@ -341,14 +335,14 @@ function CloudflareCli(options) {
   function listZones() {
     return self.cloudflareClient.findZones({page: 1, per_page: self.perPage})
       .then(function (response) {
-        var promises = [Promise.resolve(response)];
-        for (var i = 2; i <= response.data['result_info']['total_pages']; i++) {
+        let promises = [Promise.resolve(response)];
+        for (let i = 2; i <= response.data['result_info']['total_pages']; i++) {
           promises.push(self.cloudflareClient.findZones({page: i, per_page: self.perPage}));
         }
         return Promise.all(promises);
       })
       .then(function (responses) {
-        var rows = [];
+        let rows = [];
         _.each(responses, function (response) {
           _.each(response.data.result, function (item) {
             rows.push(_.extend(item, {planName: item.plan.name}));
@@ -365,13 +359,7 @@ function CloudflareCli(options) {
   function toggleDevMode(options) {
     return getZone(options.domain).then(function (zone) {
       //Use alternate api client
-      return apiClient.zoneSettingsDevelopmentModeUpdate(
-        zone.id,
-        {
-          value: options.mode
-        }
-      );
-
+      return self.cloudflareClient.setDevelopmentMode(zone.id, options.mode);
     }).then(function () {
       return new Result(['Dev mode changed to ' + options.mode]);
     })
@@ -384,7 +372,7 @@ function CloudflareCli(options) {
    */
   function purgeCache(options) {
     return getZone(options.domain).then(function (zone) {
-      var query = (options._[1]) ? {files: options._.slice(1)} : {purge_everything: true};
+      let query = (options._[1]) ? {files: options._.slice(1)} : {purge_everything: true};
       return self.cloudflareClient.purgeCache(zone.id, query);
     }).then(function () {
       return new Result('Purged cache successfully');
@@ -428,9 +416,9 @@ function CloudflareCli(options) {
    * @return {Object}
    */
   function mapParams(cmd, params) {
-    var query = [];
+    let query = [];
     if (cmd.mergeAdditionalParams && params._ !== undefined) {
-      var paramCount = cmd.params.length + cmd.optionalParams.length;
+      let paramCount = cmd.params.length + cmd.optionalParams.length;
       params._[paramCount] = _.slice(params._, paramCount).join(' ');
     }
     //Process query option
@@ -455,8 +443,8 @@ function CloudflareCli(options) {
    */
   function mapRecordOptions(options) {
     if (options.type === 'SRV') {
-      var contentParts = options.content.split(' ');
-      var serverParts = options.name.split('.');
+      let contentParts = options.content.split(' ');
+      let serverParts = options.name.split('.');
       options.data = {
         service: serverParts[0],
         proto: serverParts[1],
