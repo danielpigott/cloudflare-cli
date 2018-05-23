@@ -5,9 +5,6 @@ cloudflare-cli
 
 CLI for interacting with Cloudflare
 
-**Note:**
-All commands from version 1 should work as before as they have aliases set e.g. addrecord is aliased to add
-
 ## Installation
 `npm install -g cloudflare-cli`
 
@@ -48,6 +45,7 @@ If you have the below environment variables set, they will be used in preference
 ```
     CF_API_KEY # maps to token
     CF_API_EMAIL # maps to email
+    CF_API_DOMAIN # maps to domain
 ```
 
 ## Usage
@@ -150,4 +148,13 @@ cfcli -d test.com purge http://test.com/script.js http://test.com/styles.css
 Enable dev mode for test.com domain
 ```
 cfcli -d test.com devmode on
+```
+### Testing
+In order to run the tests you will need to set valid values for the 
+CF_API_EMAIL,CF_API_KEY and CF_API_DOMAIN environment variables.
+This will run add and remove records against the given domain
+
+The tests can be run with the following command
+```
+yarn test
 ```
