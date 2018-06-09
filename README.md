@@ -90,6 +90,8 @@ COMMANDS:
         Purge file at given urls (space separated) or all files if no url given
     rm <name> [content]
         Remove record with given name and optionally specific value
+    zone-add <name>
+        Add a zone for given name
     zones
         List domains in your cloudflare account
 ```
@@ -149,6 +151,12 @@ Enable dev mode for test.com domain
 ```
 cfcli -d test.com devmode on
 ```
+
+Add the zone test.com
+```
+cfcli zone-add test.com
+```
+
 ### Testing
 In order to run the tests you will need to set valid values for the 
 CF_API_EMAIL,CF_API_KEY and CF_API_DOMAIN environment variables.

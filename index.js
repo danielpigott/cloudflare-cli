@@ -108,6 +108,22 @@ function CloudflareCli(options) {
         values: ['type', 'name', 'content', 'ttl', 'proxied']
       })
     },
+    zoneAdd: {
+      aliases: ['zone-add'],
+      callback: addZone,
+      description: 'Add a new zone to your cloudflare account',
+      params: ['name'],
+      optionalParams: [],
+      formatter: new formatters.MessageFormatter()
+    },
+    zoneRm: {
+      aliases: ['zone-rm'],
+      callback: removeZone,
+      description: 'Remove a zone from your cloudflare account',
+      params: ['name'],
+      optionalParams: [],
+      formatter: new formatters.MessageFormatter()
+    },
     zones: {
       aliases: ['zones', 'listdomains'],
       callback: listZones,
@@ -128,6 +144,8 @@ function CloudflareCli(options) {
   self.enableProxy = enableProxy;
   self.findRecord = findRecord;
   self.listRecords = listRecords;
+  self.addZone = addZone;
+  self.removeZone = removeZone;
   self.listZones = listZones;
   self.purgeCache = purgeCache;
   self.removeRecord = removeRecord;
@@ -326,6 +344,35 @@ function CloudflareCli(options) {
         });
       });
       return new Result(rows);
+    });
+  }
+
+  /**
+   *
+   * @param options
+   * @returns {PromiseLike<Result> | Promise<Result>}
+   */
+  function addZone(options) {
+    return self.cloudflareClient.addZone(options.name).then(function(response) {
+      return new Result([
+        format(
+          'Added zone %s',
+          response.data.result.name,
+        )
+      ]);
+    });
+  }
+
+  /**
+   *
+   * @param options
+   * @returns {Promise<any>}
+   */
+  function removeZone(options) {
+    return getZone(options.domain).then(function (zone) {
+      return self.cloudflareClient.removeZone(zone.id);
+    }).then(function (response) {
+      return new Result(['Deleted zone with id ' + response.data.result.id]);
     });
   }
 
