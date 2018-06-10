@@ -357,7 +357,7 @@ function CloudflareCli(options) {
       return new Result([
         format(
           'Added zone %s',
-          response.data.result.name,
+          response.data.result.name
         )
       ]);
     });
