@@ -7,11 +7,11 @@ const assert = require('assert');
 
 const config = new ConfigReader().readConfig();
 const cli = new CloudflareCli(config);
+const zoneName = 'cloudflaretest.com';
 const recordName = uuid();
 const requiredEnvVars = [
   'CF_API_KEY',
   'CF_API_EMAIL',
-  'CF_API_DOMAIN'
 ];
 
 _.each(requiredEnvVars, function (envVar) {
@@ -27,28 +27,41 @@ describe('CloudflareCli', function () {
     assert.equal(cli.key, process.env.CF_API_KEY);
     assert.equal(cli.email, process.env.CF_API_EMAIL);
   });
+  it('shoud add a zone', function(done) {
+    cli.addZone({name: zoneName}).then(
+      function () {
+        done();
+      }
+    ).catch(function(error) {
+      done(error);
+    });
+  });
   it('should add an A record', function (done) {
     cli.addRecord({
-      'domain': config.domain,
+      'domain': zoneName,
       'type': 'A',
       'name': recordName,
       'content': '8.8.8.8'
     }).then(function () {
       done();
     }).catch(function (error) {
-      console.log(error.response.data.errors);
       done(error);
     });
   });
   it('should find an A record', function (done) {
-    cli.findRecord({domain: config.domain, 'name': recordName}).then(function (result) {
-      assert.equal(result.messages[0].name, `${recordName}.${config.domain}`);
+    cli.findRecord({domain: zoneName, 'name': recordName}).then(function (result) {
+      assert.equal(result.messages[0].name, `${recordName}.${zoneName}`);
       done();
     });
   });
   it('should remove an A record', function (done) {
-    cli.removeRecord({'domain': config.domain, 'name': recordName}).then(function () {
+    cli.removeRecord({'domain': zoneName, 'name': recordName}).then(function () {
       done();
     });
   });
+  it('should remove a zone', function (done) {
+    cli.removeZone({name: zoneName}).then(function() {
+      done();
+    });
+  })
 });

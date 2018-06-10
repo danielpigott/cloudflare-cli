@@ -125,7 +125,7 @@ function CloudflareCli(options) {
       formatter: new formatters.MessageFormatter()
     },
     zones: {
-      aliases: ['zones', 'listdomains'],
+      aliases: ['zone-ls', 'zones', 'listdomains'],
       callback: listZones,
       params: [],
       description: 'List zones in your cloudflare account',
@@ -353,7 +353,7 @@ function CloudflareCli(options) {
    * @returns {PromiseLike<Result> | Promise<Result>}
    */
   function addZone(options) {
-    return self.cloudflareClient.addZone(options.name).then(function(response) {
+    return self.cloudflareClient.addZone(options.name).then(function (response) {
       return new Result([
         format(
           'Added zone %s',
@@ -369,7 +369,7 @@ function CloudflareCli(options) {
    * @returns {Promise<any>}
    */
   function removeZone(options) {
-    return getZone(options.domain).then(function (zone) {
+    return getZone(options.name).then(function (zone) {
       return self.cloudflareClient.removeZone(zone.id);
     }).then(function (response) {
       return new Result(['Deleted zone with id ' + response.data.result.id]);
