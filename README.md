@@ -43,9 +43,9 @@ You can then use `-u play` to interact with the second cloudflare account.
 ### Environment Variables
 If you have the below environment variables set, they will be used in preference to your config file:
 ```
-    CF_API_KEY # maps to token
-    CF_API_EMAIL # maps to email
-    CF_API_DOMAIN # maps to domain
+CF_API_KEY # maps to token
+CF_API_EMAIL # maps to email
+CF_API_DOMAIN # maps to domain
 ```
 
 ## Usage
@@ -159,8 +159,9 @@ cfcli zone-add test.com
 
 ### Testing
 In order to run the tests you will need to set valid values for the 
-CF_API_EMAIL,CF_API_KEY and CF_API_DOMAIN environment variables.
-This will run add and remove records against the given domain
+CF_API_EMAIL and CF_API_KEY environment variables.
+This will run add a zone (cloudflaretest.com), add and remove records against that domain and then remove
+the zone.
 
 The tests can be run with the following command
 ```

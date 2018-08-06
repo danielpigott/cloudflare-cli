@@ -116,14 +116,15 @@ function CloudflareCli(options) {
       optionalParams: [],
       formatter: new formatters.MessageFormatter()
     },
-    zoneRm: {
-      aliases: ['zone-rm'],
-      callback: removeZone,
-      description: 'Remove a zone from your cloudflare account',
-      params: ['name'],
-      optionalParams: [],
-      formatter: new formatters.MessageFormatter()
-    },
+    //TODO uncomment once guard is in place for deleting zones
+    // zoneRm: {
+    //   aliases: ['zone-rm'],
+    //   callback: removeZone,
+    //   description: 'Remove a zone from your cloudflare account',
+    //   params: ['name'],
+    //   optionalParams: [],
+    //   formatter: new formatters.MessageFormatter()
+    // },
     zones: {
       aliases: ['zone-ls', 'zones', 'listdomains'],
       callback: listZones,

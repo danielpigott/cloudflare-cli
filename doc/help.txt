@@ -37,5 +37,7 @@ COMMANDS:
         Purge file at given urls (space separated) or all files if no url given
     rm <name> [content]
         Remove record with given name and optionally specific value
+    zone-add <name>
+        Add a zone for given name
     zones
         List domains in your cloudflare account

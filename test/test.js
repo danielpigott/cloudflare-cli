@@ -22,7 +22,7 @@ _.each(requiredEnvVars, function (envVar) {
 });
 
 describe('CloudflareCli', function () {
-  this.timeout(5000);
+  this.timeout(10000);
   it('should use environment variables where available', function () {
     assert.equal(cli.key, process.env.CF_API_KEY);
     assert.equal(cli.email, process.env.CF_API_EMAIL);
@@ -33,6 +33,7 @@ describe('CloudflareCli', function () {
         done();
       }
     ).catch(function(error) {
+      console.log(error);
       done(error);
     });
   });
