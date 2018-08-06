@@ -160,7 +160,7 @@ cfcli zone-add test.com
 ### Testing
 In order to run the tests you will need to set valid values for the 
 CF_API_EMAIL and CF_API_KEY environment variables.
-This will run add a zone (cloudflaretest.com), add and remove records against that domain and then remove
+This will add a zone (cloudflaretest.com), add and remove records against that domain and then remove
 the zone.
 
 The tests can be run with the following command
