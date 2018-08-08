@@ -7,6 +7,7 @@ const fs = require('fs');
  * @constructor
  */
 function CloudflareCli(options) {
+  const requiredOptions = ['token', 'email'];
   let self = this;
   self.email = null;
   self.key = null;
@@ -172,8 +173,15 @@ function CloudflareCli(options) {
    */
   function runCommand(command, options) {
     let cmd = getCommand(command);
-    if (!cmd) {
+    if (!cmd || command === 'help') {
       cmd = getCommand('help');
+    } else {
+      try {
+        validateConfig(options);
+      } catch(error) {
+        console.log(error.message);
+        process.exit(1);
+      }
     }
     let fn = cmd.callback;
     let opts = mapParams(cmd, options);
@@ -525,6 +533,22 @@ function CloudflareCli(options) {
    */
   function getQueryParams(options, allowed) {
     return _(options).pick(allowed).omitBy(_.isUndefined).value();
+  }
+
+  /**
+   * Check that required config is set
+   * @param config
+   */
+  function validateConfig(config) {
+    let missing = [];
+    _.each(requiredOptions, function (option) {
+      if (config[option] === undefined) {
+        missing.push(option);
+      }
+    });
+    if (missing.length > 0) {
+      throw new Error('The following required parameters were not provided: ' + missing.join(','));
+    }
   }
 }
 
