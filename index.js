@@ -186,7 +186,13 @@ function CloudflareCli(options) {
       process.exit();
     }).catch(function (error) {
       let formatter = new formatters.MessageFormatter();
-      formatter.format(['Error: ' + error.response.data.errors[0].message]);
+      if (error.response) {
+        console.log(error);
+        formatter.format(['Error response received: ' + error.response.data.errors[0].message]);
+      } else {
+
+        formatter.format([error.message]);
+      }
       process.exit(1);
     });
   }
