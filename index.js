@@ -132,9 +132,9 @@ function CloudflareCli(options) {
       params: [],
       description: 'List zones in your cloudflare account',
       formatter: new formatters.TableFormatter({
-        head: ['Name', 'Plan', 'Active', 'ID'],
-        colWidths: [50, 20, 10, 40],
-        values: ['name', 'planName', 'status', 'id']
+        head: ['Name', 'Plan', 'Active', 'ID', 'Account'],
+        colWidths: [50, 20, 10, 40, 40],
+        values: ['name', 'planName', 'status', 'id', 'accountName']
       })
     }
   };
@@ -178,7 +178,7 @@ function CloudflareCli(options) {
     } else {
       try {
         validateConfig(options);
-      } catch(error) {
+      } catch (error) {
         console.log(error.message);
         process.exit(1);
       }
@@ -408,7 +408,13 @@ function CloudflareCli(options) {
         let rows = [];
         _.each(responses, function (response) {
           _.each(response.data.result, function (item) {
-            rows.push(_.extend(item, {planName: item.plan.name}));
+            rows.push(_.extend(
+              item,
+              {
+                planName: item.plan.name,
+                accountName: item.account.name
+              }
+            ));
           })
         });
         return new Result(rows);
