@@ -191,7 +191,6 @@ function CloudflareCli(options) {
       } else {
         console.log(result);
       }
-      process.exit();
     }).catch(function (error) {
       let formatter = new formatters.MessageFormatter();
       if (error.response) {
