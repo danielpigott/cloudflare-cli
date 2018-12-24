@@ -12,7 +12,7 @@ You can also use cloudflare-cli using Docker so you won't have to install npm
 dependencies on your host.
 ```bash
 docker build -t cloudflare-cli .
-docker run --rm -it --name cfcli cloudflare-cli -h
+docker run --rm -it cloudflare-cli -h
 ```
 
 ## Setup
