@@ -9,4 +9,4 @@ COPY . /usr/src/app
 RUN npm install
 RUN npm link
 
-CMD [ "cfcli" ]
+ENTRYPOINT [ "cfcli" ]
