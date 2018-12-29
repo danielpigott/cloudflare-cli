@@ -8,6 +8,13 @@ CLI for interacting with Cloudflare
 ## Installation
 `npm install -g cloudflare-cli`
 
+You can also use cloudflare-cli using Docker so you won't have to install npm
+dependencies on your host.
+```bash
+docker build -t cloudflare-cli .
+docker run --rm -it cloudflare-cli -h
+```
+
 ## Setup
 You can setup a yaml config file with default parameters e.g. token and email.
 By default cfcli will look for ".cfcli.yml" in your home directory (you can also pass in a config file with -c)
@@ -99,7 +106,7 @@ COMMANDS:
 ### Examples
 Add a new A record (mail) and activate cloudflare (-a)
 ```
-cfcli -a -t A add mail 8.8.8.8 
+cfcli -a -t A add mail 8.8.8.8
 ```
 
 Edit a record (mail) and set the TTL
@@ -158,7 +165,7 @@ cfcli zone-add test.com
 ```
 
 ### Testing
-In order to run the tests you will need to set valid values for the 
+In order to run the tests you will need to set valid values for the
 CF_API_EMAIL and CF_API_KEY environment variables.
 This will add a zone (cloudflaretest.com), add and remove records against that domain and then remove
 the zone.
