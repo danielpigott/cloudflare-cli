@@ -517,9 +517,9 @@ function CloudflareCli(options) {
         service: serverParts[0],
         proto: serverParts[1],
         name: _.slice(serverParts, 2).join('.'),
-        priority: contentParts[1],
-        weight: contentParts[1],
-        port: contentParts[2],
+        priority: parseInt(contentParts[0]),
+        weight: parseInt(contentParts[1]),
+        port: parseInt(contentParts[2]),
         target: contentParts[3]
       }
     }
