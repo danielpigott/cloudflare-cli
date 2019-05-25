@@ -193,12 +193,11 @@ function CloudflareCli(options) {
       }
     }).catch(function (error) {
       let formatter = new formatters.MessageFormatter();
-      if (error.response) {
-        console.log(error);
+      //Log error from server if provided in the response
+      if (error.response && error.response.data.errors) {
         formatter.format(['Error response received: ' + error.response.data.errors[0].message]);
       } else {
-
-        formatter.format([error.message]);
+        formatter.format(['Error when communicating with api: ' + error.message]);
       }
       process.exit(1);
     });
