@@ -36,6 +36,7 @@ jobs:
           path: ~/junit
 
 workflows:
+  version: 2
   build:
     jobs:
       - build
