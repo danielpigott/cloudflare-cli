@@ -43,6 +43,7 @@ workflows:
   build-docker-publish:
     jobs:
       - docker-publish/publish:
+          tag: latest
           filters:
             branches:
               only: master
