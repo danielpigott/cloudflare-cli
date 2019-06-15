@@ -42,8 +42,14 @@ workflows:
       - build
   build-docker-publish:
     jobs:
-      - docker/build_image
+      - docker/build_image:
+          filters:
+            branches:
+              only: master
       - docker/publish_image:
+          filters:
+            branches:
+              only: master
           requires:
             - docker/build_image
 
