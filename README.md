@@ -6,12 +6,25 @@ cloudflare-cli
 CLI for interacting with Cloudflare
 
 ## Installation
-`npm install -g cloudflare-cli`
+You can install using NPM or using Docker
 
-You can also use cloudflare-cli using Docker so you won't have to install npm
-dependencies on your host.
+Install via npm
 ```bash
+npm install -g cloudflare-cli
+```
+
+Install from Dockerhub
+```bash
+docker pull dpig/cloudflare-cli:latest
+#Running a command
+docker run --rm -it cloudflare-cli -h
+```
+
+Build Dockerfile locally
+```bash
+git clone https://github.com/danielpigott/cloudflare-cli.git\
 docker build -t cloudflare-cli .
+#Running a command
 docker run --rm -it cloudflare-cli -h
 ```
 

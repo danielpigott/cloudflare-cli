@@ -2,16 +2,16 @@
 #
 # Check https://circleci.com/docs/2.0/language-javascript/ for more details
 #
-version: 2
+version: 2.1
+orbs:
+  docker-publish: circleci/docker-publish@0.1.7
 jobs:
   build:
     docker:
       # specify the version you desire here
       - image: circleci/node:7.10
-
     steps:
       - checkout
-
       # Download and cache dependencies
       - restore_cache:
           keys:
@@ -25,7 +25,6 @@ jobs:
           paths:
             - node_modules
           key: v1-dependencies-{{ checksum "package.json" }}
-
       - run: mkdir ~/junit
       - run:
           command: yarn test-ci
@@ -36,5 +35,14 @@ jobs:
       - store_artifacts:
           path: ~/junit
 
-
-
+workflows:
+  version: 2
+  build:
+    jobs:
+      - build
+  build-docker-publish:
+    jobs:
+      - docker-publish/publish:
+          filters:
+            branches:
+              only: master
