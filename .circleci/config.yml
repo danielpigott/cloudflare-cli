@@ -4,7 +4,7 @@
 #
 version: 2.1
 orbs:
-  docker: ledger/docker@volatile
+  docker-publish: circleci/docker-publish@0.1.7
 jobs:
   build:
     docker:
@@ -42,14 +42,7 @@ workflows:
       - build
   build-docker-publish:
     jobs:
-      - docker/build_image:
+      - docker-publish/publish:
           filters:
             branches:
               only: master
-      - docker/publish_image:
-          filters:
-            branches:
-              only: master
-          requires:
-            - docker/build_image
-
