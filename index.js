@@ -7,7 +7,7 @@ const fs = require('fs');
  * @constructor
  */
 function CloudflareCli(options) {
-  const requiredOptions = ['token', 'email'];
+  const requiredOptions = ['token'];
   let self = this;
   self.email = null;
   self.key = null;
@@ -163,7 +163,7 @@ function CloudflareCli(options) {
   function init(options) {
     self.email = options.email;
     self.key = options.token;
-    self.cloudflareClient = new CloudFlareClient(options.email, options.token);
+    self.cloudflareClient = new CloudFlareClient(options.token, options.email);
   }
 
   /**

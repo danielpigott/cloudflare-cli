@@ -5,6 +5,15 @@ cloudflare-cli
 
 CLI for interacting with Cloudflare
 
+## Cloudflare API Keys and Tokens
+
+* Cloudflare has two API client methods: **Keys** and **Tokens**.
+* **Keys** are named the `Global API Key` and match against a user's eMail address.
+* **Tokens** can be setup with specific permissions and do _not_ use an eMail address.
+* In the `cfcli` setup, if you exclude an eMail address, then the `cfcli` tool will assume you are using an **API Token** instead of an **API Key**.
+
+![doc/cloudflare_api_tokens_and_keys.png](doc/cloudflare_api_tokens_and_keys.png)
+
 ## Installation
 You can install using NPM or using Docker
 
@@ -16,7 +25,7 @@ npm install -g cloudflare-cli
 Install from Dockerhub
 ```bash
 docker pull dpig/cloudflare-cli:latest
-#Running a command
+# Running a command
 docker run --rm -it cloudflare-cli -h
 ```
 
@@ -24,7 +33,7 @@ Build Dockerfile locally
 ```bash
 git clone https://github.com/danielpigott/cloudflare-cli.git\
 docker build -t cloudflare-cli .
-#Running a command
+# Running a command
 docker run --rm -it cloudflare-cli -h
 ```
 
@@ -56,12 +65,29 @@ accounts:
         token: <cloudflare-token>
         email: <you@domain.com>
         domain: <default-cloudflare-domain>
+    adventure:
+        token: <cloudflare-token>
+        domain: <default-cloudflare-domain>
 ```
 
 You can then use `-u play` to interact with the second cloudflare account.
 
+If the `email` option is excluded, then the request will be made using what is assumed to be an **API Token** vs. an **API Key.**
+
+```yaml
+defaults:
+    account: adventure
+accounts:
+    adventure:
+        token: <cloudflare-token>
+        domain: <default-cloudflare-domain>
+```
+
 ### Environment Variables
-If you have the below environment variables set, they will be used in preference to your config file:
+
+* Environment variables take precedence over the configuration file.
+* If the `CF_API_EMAIL` variable is excluded, then the request will be made using what is assumed to be an **API Token** vs. an **API Key.**
+
 ```
 CF_API_KEY # maps to token
 CF_API_EMAIL # maps to email
@@ -178,12 +204,14 @@ cfcli zone-add test.com
 ```
 
 ### Testing
-In order to run the tests you will need to set valid values for the
-CF_API_EMAIL and CF_API_KEY environment variables.
-This will add a zone (cloudflaretest.com), add and remove records against that domain and then remove
-the zone.
+* In order to run the tests you will need to set valid values for the
+  `CF_API_EMAIL` and `CF_API_KEY` environment variables.
 
-The tests can be run with the following command
-```
+* This will add a zone _(cloudflaretest.com)_, add and remove records against that domain and then remove
+  the zone.
+
+* The tests can be run with the following command
+
+```bash
 yarn test
 ```
