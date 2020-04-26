@@ -70,9 +70,9 @@ function CloudflareCli(options) {
       params: ['name'],
       optionalParams: ['content'],
       formatter: new formatters.TableFormatter({
-        head: ['Type', 'Name', 'Value', 'TTL', 'Active'],
+        head: ['Type', 'Name', 'Value', 'TTL', 'Active', 'ID'],
         colWidths: [8, 40, 50, 10, 10],
-        values: ['type', 'name', 'content', 'ttl', 'proxied']
+        values: ['type', 'name', 'content', 'ttl', 'proxied', 'id']
       })
     },
     help: {
@@ -104,9 +104,9 @@ function CloudflareCli(options) {
       optionalParams: [],
       description: 'List records for given domain',
       formatter: new formatters.TableFormatter({
-        head: ['Type', 'Name', 'Value', 'TTL', 'Active'],
+        head: ['Type', 'Name', 'Value', 'TTL', 'Active', 'ID'],
         colWidths: [8, 40, 50, 10, 10],
-        values: ['type', 'name', 'content', 'ttl', 'proxied']
+        values: ['type', 'name', 'content', 'ttl', 'proxied', 'id']
       })
     },
     zoneAdd: {
