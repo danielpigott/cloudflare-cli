@@ -71,7 +71,7 @@ function CloudflareCli(options) {
       optionalParams: ['content'],
       formatter: new formatters.TableFormatter({
         head: ['Type', 'Name', 'Value', 'TTL', 'Active', 'ID'],
-        colWidths: [8, 40, 50, 10, 10],
+        colWidths: [8, 40, 50, 10, 8, 34],
         values: ['type', 'name', 'content', 'ttl', 'proxied', 'id']
       })
     },
@@ -105,7 +105,7 @@ function CloudflareCli(options) {
       description: 'List records for given domain',
       formatter: new formatters.TableFormatter({
         head: ['Type', 'Name', 'Value', 'TTL', 'Active', 'ID'],
-        colWidths: [8, 40, 50, 10, 10],
+        colWidths: [8, 40, 50, 10, 8, 34],
         values: ['type', 'name', 'content', 'ttl', 'proxied', 'id']
       })
     },

@@ -5,15 +5,6 @@ cloudflare-cli
 
 CLI for interacting with Cloudflare
 
-## Cloudflare API Keys and Tokens
-
-* Cloudflare has two API client methods: **Keys** and **Tokens**.
-* **Keys** are named the `Global API Key` and match against a user's eMail address.
-* **Tokens** can be setup with specific permissions and do _not_ use an eMail address.
-* In the `cfcli` setup, if you exclude an eMail address, then the `cfcli` tool will assume you are using an **API Token** instead of an **API Key**.
-
-![doc/cloudflare_api_tokens_and_keys.png](doc/cloudflare_api_tokens_and_keys.png)
-
 ## Installation
 You can install using NPM or using Docker
 
@@ -41,13 +32,24 @@ docker run --rm -it cloudflare-cli -h
 You can setup a yaml config file with default parameters e.g. token and email.
 By default cfcli will look for ".cfcli.yml" in your home directory (you can also pass in a config file with -c)
 
+### Cloudflare API Keys and Tokens
+
+Cloudflare has two API client methods:  [API Keys](https://developers.cloudflare.com/api/tokens) and [API Tokens](https://developers.cloudflare.com/api/keys) (Legacy) (See below screenshot)
+* **API Tokens** can be setup with specific permissions and do _not_ use an email address.
+* **API Keys** are the legacy method, do not have specific permissions and require the corresponding user's email address to be provided.
+
+In the `cfcli` setup, if you exclude an email address, then the `cfcli` tool will assume you are using an **API Token** instead of an **API Key**.
+
+![doc/cloudflare_api_tokens_and_keys.png](doc/cloudflare_api_tokens_and_keys.png)
+
+
 ### Configuration Example
 If you have only one cloudflare account you can set it up as below:
 
 ```yaml
 defaults:
     token: <cloudflare-token>
-    email: <you@domain.com>
+    email: <you@domain.com> #Only required if using legacy API Key
     domain: <default-cloudflare-domain>
 ```
 
@@ -204,13 +206,12 @@ cfcli zone-add test.com
 ```
 
 ### Testing
-* In order to run the tests you will need to set valid values for the
+In order to run the tests you will need to set valid values for the
   `CF_API_EMAIL` and `CF_API_KEY` environment variables.
 
-* This will add a zone _(cloudflaretest.com)_, add and remove records against that domain and then remove
-  the zone.
+Running the tests will add a zone _(cloudflaretest.com)_, add and remove records against that domain and then remove the zone.
 
-* The tests can be run with the following command
+ The tests can be run with the following command
 
 ```bash
 yarn test

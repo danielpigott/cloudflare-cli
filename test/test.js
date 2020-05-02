@@ -11,7 +11,6 @@ const zoneName = 'cloudflaretest.com';
 const recordName = uuid();
 const requiredEnvVars = [
   'CF_API_KEY',
-  'CF_API_EMAIL',
 ];
 
 _.each(requiredEnvVars, function (envVar) {
