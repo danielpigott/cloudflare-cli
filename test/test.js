@@ -26,7 +26,7 @@ describe('CloudflareCli', function () {
     assert.equal(cli.key, process.env.CF_API_KEY);
     assert.equal(cli.email, process.env.CF_API_EMAIL);
   });
-  it('shoud add a zone', function(done) {
+  it('should add a zone', function(done) {
     cli.addZone({name: zoneName}).then(
       function () {
         done();
