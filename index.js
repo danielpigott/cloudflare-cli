@@ -31,6 +31,14 @@ function CloudflareCli(options) {
       mergeAdditionalParams: true,
       formatter: new formatters.MessageFormatter()
     },
+    alwaysUseHttps: {
+      aliases: ['always-use-https', 'https'],
+      callback: toggleAlwaysUseHttps,
+      params: ['mode'],
+      optionalParams: [],
+      description: "Redirect all requests with scheme 'http' to 'https'",
+      formatter: new formatters.MessageFormatter()
+    },
     devmode: {
       aliases: ['devmode'],
       callback: toggleDevMode,
@@ -153,6 +161,7 @@ function CloudflareCli(options) {
   self.removeRecord = removeRecord;
   self.showHelp = showHelp;
   self.toggleDevMode = toggleDevMode;
+  self.toggleAlwaysUseHttps = toggleAlwaysUseHttps;
 
   init(options);
 
@@ -228,6 +237,18 @@ function CloudflareCli(options) {
         }
       )
   }
+
+   /**
+    * Enable/disable Always Use HTTPS mode
+    * @param options
+    */
+   function toggleAlwaysUseHttps(options) {
+     return getZone(options.domain).then(function (zone) {
+       return self.cloudflareClient.setAlwaysUseHttps(zone.id, options.mode);
+     }).then(function () {
+       return new Result(['Always Use HTTPS mode changed to ' + options.mode]);
+     })
+   }
 
   /**
    * Enable proxying/caching for given record
