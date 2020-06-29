@@ -21,6 +21,8 @@ OPTIONS:
 COMMANDS:
     add <name> <content>
         Add a DNS record. Use -a to activate cf after creation
+    always-use-https on|off
+        Toggle Always Use HTTPS mode on/off
     devmode on|off
         Toggle development mode on/off
     disable <name> [content]
