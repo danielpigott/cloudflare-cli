@@ -551,6 +551,9 @@ function CloudflareCli(options) {
     if (options.activate !== undefined) {
       options.proxied = options.activate;
     }
+    if (options.name !== undefined) {
+      options.name = _.toString(options.name);
+    }
     options = _.omit(options, ['domain', 'email', 'token', '_', 'activate', 'a']);
 
     return options;
