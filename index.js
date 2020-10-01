@@ -204,9 +204,11 @@ function CloudflareCli(options) {
       let formatter = new formatters.MessageFormatter();
       //Log error from server if provided in the response
       if (error.response && error.response.data.errors) {
-        formatter.format(['Error response received: ' + error.response.data.errors[0].message]);
+        formatter.format([`Error response received: ${error.response.data.errors[0].message}`]);
+      } else if (error.message) {
+        formatter.format([`Error when communicating with api: ${error.message}`]);
       } else {
-        formatter.format(['Error when communicating with api: ' + error.message]);
+        formatter.format([`Error: ${error}`]);
       }
       process.exit(1);
     });
@@ -304,6 +306,9 @@ function CloudflareCli(options) {
    */
   function removeRecord(options) {
     let query = getQueryParams(options, ['name', 'content', 'type', 'query']);
+    if (query.name === undefined) {
+      return Promise.reject('name not provided');
+    }
     return find(options.domain, query).then(function (response) {
       let records = response.data.result;
       if (records.length === 0) {
@@ -557,7 +562,7 @@ function CloudflareCli(options) {
    * @param allowed
    */
   function getQueryParams(options, allowed) {
-    return _(options).pick(allowed).omitBy(_.isUndefined).value();
+    return _(options).pick(allowed).omitBy(_.isUndefined).mapValues((val) => {return _.toString(val)}).value();
   }
 
   /**
