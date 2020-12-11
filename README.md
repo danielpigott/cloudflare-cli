@@ -34,11 +34,11 @@ By default cfcli will look for ".cfcli.yml" in your home directory (you can also
 
 ### Cloudflare API Keys and Tokens
 
-Cloudflare has two API client methods:  [API Keys](https://developers.cloudflare.com/api/tokens) and [API Tokens](https://developers.cloudflare.com/api/keys) (Legacy) (See below screenshot)
-* **API Tokens** can be setup with specific permissions and do _not_ use an email address.
+Cloudflare has two API client methods:  [API Tokens](https://developers.cloudflare.com/api/tokens) and [API Keys](https://developers.cloudflare.com/api/keys) (Legacy) (See below screenshot)
+* **API Tokens** can be setup with specific permissions and do _not_ use an email address. Recommended by Cloudflare
 * **API Keys** are the legacy method, do not have specific permissions and require the corresponding user's email address to be provided.
 
-In the `cfcli` setup, if you exclude an email address, then the `cfcli` tool will assume you are using an **API Token** instead of an **API Key**.
+In the `cfcli` setup, if you _exclude_ an email address, then the `cfcli` tool will assume you are using an **API Token** instead of an **API Key**.
 
 ![doc/cloudflare_api_tokens_and_keys.png](doc/cloudflare_api_tokens_and_keys.png)
 
