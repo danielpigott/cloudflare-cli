@@ -24,6 +24,7 @@ function CloudflareCli(options) {
   const commands = {
     add: {
       aliases: ['add', 'addrecord'],
+      shortcut: 'a',
       callback: addRecord,
       description: 'Add a new record',
       params: ['name', 'content'],
@@ -32,7 +33,8 @@ function CloudflareCli(options) {
       formatter: new formatters.MessageFormatter()
     },
     alwaysUseHttps: {
-      aliases: ['always-use-https', 'https'],
+      aliases: ['always-use-https'],
+      shortcut: 'https',
       callback: toggleAlwaysUseHttps,
       params: ['mode'],
       optionalParams: [],
@@ -41,6 +43,7 @@ function CloudflareCli(options) {
     },
     devmode: {
       aliases: ['devmode'],
+      shortcut: 'dev',
       callback: toggleDevMode,
       params: ['mode'],
       optionalParams: [],
@@ -48,15 +51,17 @@ function CloudflareCli(options) {
       formatter: new formatters.MessageFormatter()
     },
     disable: {
-      aliases: ['disable', 'disablecf'],
+      aliases: ['disable', 'disablecf', 'disablecache', 'disableproxy'],
+      shortcut: 'dis',
       callback: disableProxy,
-      description: 'Enable cloudflare caching for given record',
+      description: 'Disable Cloudflare caching for given record',
       params: ['name'],
       optionalParams: ['content'],
       formatter: new formatters.MessageFormatter()
     },
     edit: {
       aliases: ['edit', 'editrecord'],
+      shortcut: 'e',
       callback: editRecord,
       description: 'Edit a DNS record',
       params: ['name', 'content'],
@@ -64,15 +69,17 @@ function CloudflareCli(options) {
       formatter: new formatters.MessageFormatter()
     },
     enable: {
-      aliases: ['enable', 'enablecf'],
+      aliases: ['enable', 'enablecf', 'enablecache', 'enableproxy'],
+      shortcut: 'en',
       callback: enableProxy,
-      description: 'Enable cloudflare caching for given record',
+      description: 'Enable Cloudflare caching for given record',
       params: ['name'],
       optionalParams: ['content'],
       formatter: new formatters.MessageFormatter()
     },
     find: {
-      aliases: ['find'],
+      aliases: ['find', 'findrecord'],
+      shortcut: 'f',
       callback: findRecord,
       description: 'Find a record',
       params: ['name'],
@@ -93,12 +100,14 @@ function CloudflareCli(options) {
     },
     purge: {
       aliases: ['purge', 'purgefile', 'purgecache'],
+      shortcut: 'p',
       callback: purgeCache,
       params: [],
       description: 'Purge files from cache'
     },
     rm: {
-      aliases: ['rm', 'removerecord'],
+      aliases: ['rm', 'remove', 'removerecord'],
+      shortcut: 'r',
       callback: removeRecord,
       description: 'Remove a record',
       params: ['name'],
@@ -107,6 +116,7 @@ function CloudflareCli(options) {
     },
     ls: {
       aliases: ['ls', 'listrecords', 'list'],
+      shortcut: 'l',
       callback: listRecords,
       params: [],
       optionalParams: [],
@@ -118,24 +128,27 @@ function CloudflareCli(options) {
       })
     },
     zoneAdd: {
-      aliases: ['zone-add'],
+      aliases: ['zone-add', 'add-zone', 'addzone'],
+      shortcut: 'za',
       callback: addZone,
-      description: 'Add a new zone to your cloudflare account',
+      description: 'Add a new zone to your Cloudflare account',
       params: ['name'],
       optionalParams: [],
       formatter: new formatters.MessageFormatter()
     },
     //TODO uncomment once guard is in place for deleting zones
     // zoneRm: {
-    //   aliases: ['zone-rm'],
+    //   aliases: ['zone-rm', 'removezone', 'rmzone'],
+    //   shortcut: 'zr',
     //   callback: removeZone,
-    //   description: 'Remove a zone from your cloudflare account',
+    //   description: 'Remove a zone from your Cloudflare account',
     //   params: ['name'],
     //   optionalParams: [],
     //   formatter: new formatters.MessageFormatter()
     // },
     zones: {
-      aliases: ['zone-ls', 'zones', 'listdomains'],
+      aliases: ['zone-ls', 'zones', 'listdomains', 'listzones'],
+      shortcut: 'z',
       callback: listZones,
       params: [],
       description: 'List zones in your cloudflare account',
