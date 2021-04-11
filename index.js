@@ -201,6 +201,7 @@ function CloudflareCli(options) {
       try {
         validateConfig(options);
       } catch (error) {
+        console.log(error.message);
         process.exit(1);
       }
     }
