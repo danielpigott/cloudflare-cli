@@ -1,4 +1,4 @@
-FROM node:8.14-alpine
+FROM node:lts-alpine3.13
 
 LABEL maintainer="Mriyam Tamuli <mbtamuli@gmail.com>"
 
