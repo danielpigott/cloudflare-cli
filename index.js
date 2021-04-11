@@ -201,7 +201,6 @@ function CloudflareCli(options) {
       try {
         validateConfig(options);
       } catch (error) {
-        console.log(error.message);
         process.exit(1);
       }
     }
@@ -253,17 +252,17 @@ function CloudflareCli(options) {
       )
   }
 
-   /**
-    * Enable/disable Always Use HTTPS mode
-    * @param options
-    */
-   function toggleAlwaysUseHttps(options) {
-     return getZone(options.domain).then(function (zone) {
-       return self.cloudflareClient.setAlwaysUseHttps(zone.id, options.mode);
-     }).then(function () {
-       return new Result(['Always Use HTTPS mode changed to ' + options.mode]);
-     })
-   }
+  /**
+   * Enable/disable Always Use HTTPS mode
+   * @param options
+   */
+  function toggleAlwaysUseHttps(options) {
+    return getZone(options.domain).then(function (zone) {
+      return self.cloudflareClient.setAlwaysUseHttps(zone.id, options.mode);
+    }).then(function () {
+      return new Result(['Always Use HTTPS mode changed to ' + options.mode]);
+    })
+  }
 
   /**
    * Enable proxying/caching for given record
@@ -578,7 +577,15 @@ function CloudflareCli(options) {
    * @param allowed
    */
   function getQueryParams(options, allowed) {
-    return _(options).pick(allowed).omitBy(_.isUndefined).mapValues((val) => {return _.toString(val)}).value();
+    return _(options).pick(allowed)
+      .omitBy(_.isUndefined)
+      .mapValues((val) => {
+        if (val instanceof Object) {
+          return val;
+        } else {
+          return _.toString(val);
+        }
+      }).value();
   }
 
   /**

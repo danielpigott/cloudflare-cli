@@ -54,6 +54,14 @@ describe('CloudflareCli', function () {
       done();
     });
   });
+  it('should find an A record using a query', async () => {
+    const result = await cli.findRecord({domain: zoneName, query: {content: '8.8.8.8'}});
+    assert.equal(result.messages[0].name, `${recordName}.${zoneName}`);
+  });
+  it('should not find an A record when using a non-matching query', async () => {
+    const result = await cli.findRecord({domain: zoneName, query: {content: 'xyz'}});
+    assert.equal(result.messages.length,0);
+  });
   it('should remove an A record', function (done) {
     cli.removeRecord({'domain': zoneName, 'name': recordName}).then(function () {
       done();
