@@ -17,7 +17,7 @@ Install from Dockerhub
 ```bash
 docker pull dpig/cloudflare-cli:latest
 # Running a command
-docker run --rm -it cloudflare-cli -h
+docker run --rm -it dpig/cloudflare-cli -h
 ```
 
 Build Dockerfile locally
