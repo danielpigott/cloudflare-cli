@@ -94,7 +94,7 @@ cat > $HOME/bin/cloudflare-cli << END
 #!/bin/bash
 # CLI for interacting with Cloudflare
 # https://github.com/danielpigott/cloudflare-cli
-docker run --rm -it ~/.cfcli.yml:/root/.cfcli.yml dpig/cloudflare-cli "$@"
+docker run --rm -it -v ~/.cfcli.yml:/root/.cfcli.yml dpig/cloudflare-cli "$@"
 ```
 
 You can now run the `cloudflare-cli` command directly
