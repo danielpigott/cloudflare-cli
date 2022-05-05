@@ -85,6 +85,23 @@ accounts:
         domain: <default-cloudflare-domain>
 ```
 
+### Setup local `cloudflare-cli` command running docker with a config file
+You can supply the docker version with your configuration file automatically with a small script. See above regarding the API Token creation.
+
+```bash
+mkdir -p $HOME/bin ; touch $HOME/bin/cloudflare-cli ; chmod 755 $HOME/bin/cloudflare-cli
+cat > $HOME/bin/cloudflare-cli << END
+#!/bin/bash
+# CLI for interacting with Cloudflare
+# https://github.com/danielpigott/cloudflare-cli
+docker run --rm -it ~/.cfcli.yml:/root/.cfcli.yml dpig/cloudflare-cli "$@"
+```
+
+You can now run the `cloudflare-cli` command directly
+```bash
+cloudflare-cli ls
+```
+
 ### Environment Variables
 
 * Environment variables take precedence over the configuration file.
