@@ -1,9 +1,9 @@
 #!/usr/bin/env node
-let _ = require('lodash');
-let allowedOptions = require('./../lib/options');
-let CloudflareCli = require('./../index');
-let ConfigReader = require('./../lib/configReader');
-let argv = require('minimist')(process.argv.slice(2), allowedOptions);
+import allowedOptions from './../lib/options.js';
+import { CloudflareCli } from './../index.js';
+import { ConfigReader } from './../lib/configReader.js';
+import minimist from 'minimist';
+let argv = minimist(process.argv.slice(2), allowedOptions);
 let configFile = argv.config || '~/.cfcli.yml';
 let config = {};
 try {
@@ -12,6 +12,6 @@ try {
   console.log(error.message);
   process.exit(1);
 }
-let params = _.extend(config, argv);
+let params = { ...config, ...argv };
 let cli = new CloudflareCli(params);
 cli.runCommand(argv._[0], params);

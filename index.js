@@ -3,6 +3,7 @@ import fs from 'fs';
 import { ApiClient } from './lib/apiClient.js';
 import _ from 'lodash';
 import { MessageFormatter, TableFormatter } from './lib/formatters.js';
+import path from 'path';
 
 export class CloudflareCli {
   constructor(options) {
@@ -358,7 +359,7 @@ export class CloudflareCli {
   }
 
   showHelp() {
-    return Promise.resolve(new Result([fs.readFileSync(__dirname + '/doc/help.txt', 'utf8')]));
+    return Promise.resolve(new Result([fs.readFileSync(path.resolve() + '/doc/help.txt', 'utf8')]));
   }
 
   getCommand(commandName) {
