@@ -1,6 +1,6 @@
 {
   "name": "cloudflare-cli",
-  "version": "4.2.0",
+  "version": "5.0.0",
   "description": "A command line interface for interacting with cloudflare",
   "homepage": "https://github.com/danielpigott/cloudflare-cli",
   "bugs": {
@@ -48,6 +48,6 @@
     "uuid": "^13.0.0"
   },
   "engines": {
-    "node": ">=4.0.0"
+    "node": ">=18.18.0"
   }
 }
