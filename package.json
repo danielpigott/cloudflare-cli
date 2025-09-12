@@ -1,6 +1,6 @@
 {
   "name": "cloudflare-cli",
-  "version": "5.0.2",
+  "version": "5.0.3",
   "description": "A command line interface for interacting with cloudflare",
   "homepage": "https://github.com/danielpigott/cloudflare-cli",
   "bugs": {
