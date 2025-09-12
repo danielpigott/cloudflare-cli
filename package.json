@@ -10,6 +10,7 @@
     "cloudflare",
     "cfcli"
   ],
+  "type": "module",
   "license": "MIT",
   "author": {
     "name": "Daniel Pigott",
@@ -35,16 +36,16 @@
   },
   "preferGlobal": true,
   "dependencies": {
-    "axios": "^0.21.1",
+    "axios": "^1.11.0",
     "cli-table": "~0.3.1",
-    "js-yaml": "~3.13.1",
+    "js-yaml": "~4.1.0",
     "lodash": "~4.17.15",
     "minimist": "~1.2.0"
   },
   "devDependencies": {
-    "mocha": "^5.1.1",
-    "mocha-junit-reporter": "^1.17.0",
-    "uuid": "^3.2.1"
+    "mocha": "^11.7.2",
+    "mocha-junit-reporter": "^2.2.1",
+    "uuid": "^13.0.0"
   },
   "engines": {
     "node": ">=4.0.0"

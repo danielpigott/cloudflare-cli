@@ -1,221 +1,169 @@
-const _ = require('lodash');
-const fs = require('fs');
+import util from 'util';
+import fs from 'fs';
+import { ApiClient } from './lib/apiClient.js';
+import _ from 'lodash';
+import { MessageFormatter, TableFormatter } from './lib/formatters.js';
 
-/**
- *
- * @param options
- * @constructor
- */
-function CloudflareCli(options) {
-  const requiredOptions = ['token'];
-  let self = this;
-  self.email = null;
-  self.key = null;
-  self.perPage = 50;
-
-  let CloudFlareClient = require('./lib/apiClient');
-  let format = require('util').format;
-  let formatters = require('./lib/formatters');
-
-  /**
-   * Available commands
-   * @type {Object}
-   */
-  const commands = {
-    add: {
-      aliases: ['add', 'addrecord'],
-      shortcut: 'a',
-      callback: addRecord,
-      description: 'Add a new record',
-      params: ['name', 'content'],
-      optionalParams: [],
-      mergeAdditionalParams: true,
-      formatter: new formatters.MessageFormatter()
-    },
-    alwaysUseHttps: {
-      aliases: ['always-use-https'],
-      shortcut: 'https',
-      callback: toggleAlwaysUseHttps,
-      params: ['mode'],
-      optionalParams: [],
-      description: "Redirect all requests with scheme 'http' to 'https'",
-      formatter: new formatters.MessageFormatter()
-    },
-    devmode: {
-      aliases: ['devmode'],
-      shortcut: 'dev',
-      callback: toggleDevMode,
-      params: ['mode'],
-      optionalParams: [],
-      description: "Turn dev mode on or off",
-      formatter: new formatters.MessageFormatter()
-    },
-    disable: {
-      aliases: ['disable', 'disablecf', 'disablecache', 'disableproxy'],
-      shortcut: 'dis',
-      callback: disableProxy,
-      description: 'Disable Cloudflare caching for given record',
-      params: ['name'],
-      optionalParams: ['content'],
-      formatter: new formatters.MessageFormatter()
-    },
-    edit: {
-      aliases: ['edit', 'editrecord'],
-      shortcut: 'e',
-      callback: editRecord,
-      description: 'Edit a DNS record',
-      params: ['name', 'content'],
-      optionalParams: [],
-      formatter: new formatters.MessageFormatter()
-    },
-    enable: {
-      aliases: ['enable', 'enablecf', 'enablecache', 'enableproxy'],
-      shortcut: 'en',
-      callback: enableProxy,
-      description: 'Enable Cloudflare caching for given record',
-      params: ['name'],
-      optionalParams: ['content'],
-      formatter: new formatters.MessageFormatter()
-    },
-    find: {
-      aliases: ['find', 'findrecord'],
-      shortcut: 'f',
-      callback: findRecord,
-      description: 'Find a record',
-      params: ['name'],
-      optionalParams: ['content'],
-      formatter: new formatters.TableFormatter({
-        head: ['Type', 'Name', 'Value', 'TTL', 'Active', 'ID'],
-        colWidths: [8, 40, 50, 10, 8, 34],
-        values: ['type', 'name', 'content', 'ttl', 'proxied', 'id']
-      })
-    },
-    help: {
-      aliases: ['help'],
-      shortcut: 'h',
-      params: [],
-      callback: showHelp,
-      description: 'Show help',
-      formatter: new formatters.MessageFormatter()
-    },
-    purge: {
-      aliases: ['purge', 'purgefile', 'purgecache'],
-      shortcut: 'p',
-      callback: purgeCache,
-      params: [],
-      description: 'Purge files from cache'
-    },
-    rm: {
-      aliases: ['rm', 'remove', 'removerecord'],
-      shortcut: 'r',
-      callback: removeRecord,
-      description: 'Remove a record',
-      params: ['name'],
-      optionalParams: ['content'],
-      formatter: new formatters.MessageFormatter()
-    },
-    ls: {
-      aliases: ['ls', 'listrecords', 'list'],
-      shortcut: 'l',
-      callback: listRecords,
-      params: [],
-      optionalParams: [],
-      description: 'List records for given domain',
-      formatter: new formatters.TableFormatter({
-        head: ['Type', 'Name', 'Value', 'TTL', 'Active', 'ID'],
-        colWidths: [8, 40, 50, 10, 8, 34],
-        values: ['type', 'name', 'content', 'ttl', 'proxied', 'id']
-      })
-    },
-    zoneAdd: {
-      aliases: ['zone-add', 'add-zone', 'addzone'],
-      shortcut: 'za',
-      callback: addZone,
-      description: 'Add a new zone to your Cloudflare account',
-      params: ['name'],
-      optionalParams: [],
-      formatter: new formatters.MessageFormatter()
-    },
-    //TODO uncomment once guard is in place for deleting zones
-    // zoneRm: {
-    //   aliases: ['zone-rm', 'removezone', 'rmzone'],
-    //   shortcut: 'zr',
-    //   callback: removeZone,
-    //   description: 'Remove a zone from your Cloudflare account',
-    //   params: ['name'],
-    //   optionalParams: [],
-    //   formatter: new formatters.MessageFormatter()
-    // },
-    zones: {
-      aliases: ['zone-ls', 'zones', 'listdomains', 'listzones'],
-      shortcut: 'z',
-      callback: listZones,
-      params: [],
-      description: 'List zones in your cloudflare account',
-      formatter: new formatters.TableFormatter({
-        head: ['Name', 'Plan', 'Active', 'ID', 'Account'],
-        colWidths: [50, 20, 10, 40, 40],
-        values: ['name', 'planName', 'status', 'id', 'accountName']
-      })
-    }
-  };
-
-  self.runCommand = runCommand;
-  self.addRecord = addRecord;
-  self.disableProxy = disableProxy;
-  self.editRecord = editRecord;
-  self.enableProxy = enableProxy;
-  self.findRecord = findRecord;
-  self.listRecords = listRecords;
-  self.addZone = addZone;
-  self.removeZone = removeZone;
-  self.listZones = listZones;
-  self.purgeCache = purgeCache;
-  self.removeRecord = removeRecord;
-  self.showHelp = showHelp;
-  self.toggleDevMode = toggleDevMode;
-  self.toggleAlwaysUseHttps = toggleAlwaysUseHttps;
-
-  init(options);
-
-  /**
-   * Set up client
-   * @param options
-   */
-  function init(options) {
-    self.email = options.email;
-    self.key = options.token;
-    self.cloudflareClient = new CloudFlareClient(options.token, options.email);
+export class CloudflareCli {
+  constructor(options) {
+    this.requiredOptions = ['token'];
+    this.email = options.email || null;
+    this.key = options.token || null;
+    this.perPage = 50;
+    this.format = util.format;
+    this.cloudflareClient = new ApiClient(options.token, options.email);
+    this.commands = {
+      add: {
+        aliases: ['add', 'addrecord'],
+        shortcut: 'a',
+        callback: this.addRecord.bind(this),
+        description: 'Add a new record',
+        params: ['name', 'content'],
+        optionalParams: [],
+        mergeAdditionalParams: true,
+        formatter: new MessageFormatter()
+      },
+      alwaysUseHttps: {
+        aliases: ['always-use-https'],
+        shortcut: 'https',
+        callback: this.toggleAlwaysUseHttps.bind(this),
+        params: ['mode'],
+        optionalParams: [],
+        description: "Redirect all requests with scheme 'http' to 'https'",
+        formatter: new MessageFormatter()
+      },
+      devmode: {
+        aliases: ['devmode'],
+        shortcut: 'dev',
+        callback: this.toggleDevMode.bind(this),
+        params: ['mode'],
+        optionalParams: [],
+        description: "Turn dev mode on or off",
+        formatter: new MessageFormatter()
+      },
+      disable: {
+        aliases: ['disable', 'disablecf', 'disablecache', 'disableproxy'],
+        shortcut: 'dis',
+        callback: this.disableProxy.bind(this),
+        description: 'Disable Cloudflare caching for given record',
+        params: ['name'],
+        optionalParams: ['content'],
+        formatter: new MessageFormatter()
+      },
+      edit: {
+        aliases: ['edit', 'editrecord'],
+        shortcut: 'e',
+        callback: this.editRecord.bind(this),
+        description: 'Edit a DNS record',
+        params: ['name', 'content'],
+        optionalParams: [],
+        formatter: new MessageFormatter()
+      },
+      enable: {
+        aliases: ['enable', 'enablecf', 'enablecache', 'enableproxy'],
+        shortcut: 'en',
+        callback: this.enableProxy.bind(this),
+        description: 'Enable Cloudflare caching for given record',
+        params: ['name'],
+        optionalParams: ['content'],
+        formatter: new MessageFormatter()
+      },
+      find: {
+        aliases: ['find', 'findrecord'],
+        shortcut: 'f',
+        callback: this.findRecord.bind(this),
+        description: 'Find a record',
+        params: ['name'],
+        optionalParams: ['content'],
+        formatter: new TableFormatter({
+          head: ['Type', 'Name', 'Value', 'TTL', 'Active', 'ID'],
+          colWidths: [8, 40, 50, 10, 8, 34],
+          values: ['type', 'name', 'content', 'ttl', 'proxied', 'id']
+        })
+      },
+      help: {
+        aliases: ['help'],
+        shortcut: 'h',
+        params: [],
+        callback: this.showHelp.bind(this),
+        description: 'Show help',
+        formatter: new MessageFormatter()
+      },
+      purge: {
+        aliases: ['purge', 'purgefile', 'purgecache'],
+        shortcut: 'p',
+        callback: this.purgeCache.bind(this),
+        params: [],
+        description: 'Purge files from cache'
+      },
+      rm: {
+        aliases: ['rm', 'remove', 'removerecord'],
+        shortcut: 'r',
+        callback: this.removeRecord.bind(this),
+        description: 'Remove a record',
+        params: ['name'],
+        optionalParams: ['content'],
+        formatter: new MessageFormatter()
+      },
+      ls: {
+        aliases: ['ls', 'listrecords', 'list'],
+        shortcut: 'l',
+        callback: this.listRecords.bind(this),
+        params: [],
+        optionalParams: [],
+        description: 'List records for given domain',
+        formatter: new TableFormatter({
+          head: ['Type', 'Name', 'Value', 'TTL', 'Active', 'ID'],
+          colWidths: [8, 40, 50, 10, 8, 34],
+          values: ['type', 'name', 'content', 'ttl', 'proxied', 'id']
+        })
+      },
+      zoneAdd: {
+        aliases: ['zone-add', 'add-zone', 'addzone'],
+        shortcut: 'za',
+        callback: this.addZone.bind(this),
+        description: 'Add a new zone to your Cloudflare account',
+        params: ['name'],
+        optionalParams: [],
+        formatter: new MessageFormatter()
+      },
+      zones: {
+        aliases: ['zone-ls', 'zones', 'listdomains', 'listzones'],
+        shortcut: 'z',
+        callback: this.listZones.bind(this),
+        params: [],
+        description: 'List zones in your cloudflare account',
+        formatter: new TableFormatter({
+          head: ['Name', 'Plan', 'Active', 'ID', 'Account'],
+          colWidths: [50, 20, 10, 40, 40],
+          values: ['name', 'planName', 'status', 'id', 'accountName']
+        })
+      }
+    };
   }
 
-  /**
-   * Run the given command and output the result
-   * @param command
-   * @param options
-   */
-  function runCommand(command, options) {
-    let cmd = getCommand(command);
+  runCommand(command, options) {
+    let cmd = this.getCommand(command);
     if (!cmd || command === 'help') {
-      cmd = getCommand('help');
+      cmd = this.getCommand('help');
     } else {
       try {
-        validateConfig(options);
+        this.validateConfig(options);
       } catch (error) {
         console.log(error.message);
         process.exit(1);
       }
     }
     let fn = cmd.callback;
-    let opts = mapParams(cmd, options);
-    fn(opts).then(function (result) {
+    let opts = this.mapParams(cmd, options);
+    fn(opts).then((result) => {
       if (cmd.formatter) {
         cmd.formatter.format(result.messages, options);
       } else {
         console.log(result);
       }
-    }).catch(function (error) {
-      let formatter = new formatters.MessageFormatter();
-      //Log error from server if provided in the response
+    }).catch((error) => {
+      let formatter = new MessageFormatter();
       if (error.response && error.response.data.errors) {
         formatter.format([`Error response received: ${error.response.data.errors[0].message}`]);
       } else if (error.message) {
@@ -227,170 +175,112 @@ function CloudflareCli(options) {
     });
   }
 
-  /**
-   * Create a new record of the given type
-   * @param options
-   * @return {*}
-   */
-  function addRecord(options) {
+  async addRecord(options) {
     options.type = options.type || 'CNAME';
-    return getZone(options.domain)
-      .then(function (zone) {
-        return self.cloudflareClient.addRecord(
-          zone.id,
-          _.extend({ttl: 1}, mapRecordOptions(options)));
-      })
-      .then(function (response) {
-          return new Result([
-            format(
-              'Added %s record %s -> %s',
-              response.data.result.type,
-              response.data.result.name,
-              response.data.result.content
-            )
-          ]);
-        }
+    const zone = await this.getZone(options.domain);
+    const response = await this.cloudflareClient.addRecord(
+      zone.id,
+      _.extend({ ttl: 1 }, this.mapRecordOptions(options)));
+    return new Result([
+      this.format(
+        'Added %s record %s -> %s',
+        response.data.result.type,
+        response.data.result.name,
+        response.data.result.content
       )
+    ]);
   }
 
-  /**
-   * Enable/disable Always Use HTTPS mode
-   * @param options
-   */
-  function toggleAlwaysUseHttps(options) {
-    return getZone(options.domain).then(function (zone) {
-      return self.cloudflareClient.setAlwaysUseHttps(zone.id, options.mode);
-    }).then(function () {
-      return new Result(['Always Use HTTPS mode changed to ' + options.mode]);
-    })
+  async toggleAlwaysUseHttps(options) {
+    const zone = await this.getZone(options.domain);
+    await this.cloudflareClient.setAlwaysUseHttps(zone.id, options.mode);
+    return new Result(['Always Use HTTPS mode changed to ' + options.mode]);
   }
 
-  /**
-   * Enable proxying/caching for given record
-   * @param options
-   * @return {Promise}
-   */
-  function enableProxy(options) {
+  enableProxy(options) {
     options.activate = true;
-    return editRecord(options);
+    return this.editRecord(options);
   }
 
-  /**
-   * Disable proxying/caching for given record
-   * @param options
-   * @return {Promise}
-   */
-  function disableProxy(options) {
+  disableProxy(options) {
     options.activate = false;
-    return editRecord(options);
+    return this.editRecord(options);
   }
 
-  /**
-   * Edit a record
-   * @param options
-   * @returns {Promise}
-   */
-  function editRecord(options) {
-    return find(options.domain, getQueryParams(options, ['name', 'type', 'query'])).then(function (response) {
+  async editRecord(options) {
+    return this.find(options.domain, this.getQueryParams(options, ['name', 'type', 'query'])).then((response) => {
       const records = response.data.result;
-      //Properties that are editable
-      options = mapRecordOptions(options);
+      options = this.mapRecordOptions(options);
       if (records.length === 0) {
         throw new Error('No matching records found');
       } else if (records.length === 1) {
         let record = records[0];
         options.type = options.type || record.type;
         options.content = options.content || record.content;
-        return self.cloudflareClient.editRecord(record.zone_id, record.id, options);
+        return this.cloudflareClient.editRecord(record.zone_id, record.id, options);
       } else {
-        throw new Error(format('%d matching records found, unable to update', records.count));
+        throw new Error(this.format('%d matching records found, unable to update', records.count));
       }
-    }).then(function (response) {
+    }).then((response) => {
       let record = response.data.result;
       return new Result([
-        format('Updated %s record %s (id: %s)', record.type, record.name, record.id)
+        this.format('Updated %s record %s (id: %s)', record.type, record.name, record.id)
       ]);
     });
   }
 
-  /**
-   * Remove a record/record(s) matching the given name
-   * @param options
-   */
-  function removeRecord(options) {
-    let query = getQueryParams(options, ['name', 'content', 'type', 'query']);
+  async removeRecord(options) {
+    let query = this.getQueryParams(options, ['name', 'content', 'type', 'query']);
     if (query.name === undefined) {
       return Promise.reject('name not provided');
     }
-    return find(options.domain, query).then(function (response) {
-      let records = response.data.result;
-      if (records.length === 0) {
-        throw new Error('No matching records found');
-      }
-      let results = [];
-      _.each(records, function (record) {
-        results.push(self.cloudflareClient.removeRecord(record.zone_id, record.id));
-      });
-      return Promise.all(results);
-    }).then(function (responses) {
-      let messages = _.map(responses, function (response) {
-        return 'Deleted record with id ' + response.data.result.id;
-      });
-
-      return new Result(messages);
-    });
-  }
-
-  /**
-   * Find command
-   * @param options
-   * @returns {Promise}
-   */
-  function findRecord(options) {
-    let query = getQueryParams(options, ['name', 'content', 'type', 'query']);
-    return find(options.domain, query).then(function (result) {
-      return new Result(result.data.result);
-    });
-  }
-
-  /**
-   * Find a given record
-   * @param domain
-   * @param query
-   * @return {Promise}
-   */
-  function find(domain, query) {
-    if (query.name && !query.name.includes(domain)) {
-      query.name = query.name + '.' + domain;
+    const response = await this.find(options.domain, query);
+    if (response.data.result.length === 0) {
+      throw new Error('No matching records found');
     }
+    const zone = await this.getZone(options.domain);
+    let results = [];
+    _.each(response.data.result, (record) => {
+      results.push(this.cloudflareClient.removeRecord(zone.id, record.id));
+    });
+    const responses = await Promise.all(results);
+    return new Result(_.map(responses, (response) => {
+      return 'Deleted record with id ' + response.data.result.id;
+    }));
+  }
+
+  async findRecord(options) {
+    let query = this.getQueryParams(options, ['name', 'content', 'type', 'query']);
+    const result = await this.find(options.domain, query);
+    return new Result(result.data.result);
+  }
+
+  async find(domain, query) {
     if (query.query) {
       query = _.extend(query, query.query);
       delete query.query;
     }
-    return getZone(domain).then(function (zone) {
-      return self.cloudflareClient.findRecord(zone.id, query);
-    });
+    if (query.name && !query.name.includes(domain)) {
+      query.name = `${query.name}.${domain}`;
+    }
+    const zone = await this.getZone(domain);
+    return this.cloudflareClient.findRecord(zone.id, query);
   }
 
-  /**
-   * List records for given domain
-   * @param options
-   * @returns {Promise}
-   */
-  function listRecords(options) {
-    return getZone(options.domain).then(function (zone) {
-      return self.cloudflareClient.findRecord(zone.id, {page: 1, per_page: self.perPage})
-        .then(function (response) {
+  async listRecords(options) {
+    return this.getZone(options.domain).then((zone) => {
+      return this.cloudflareClient.findRecord(zone.id, { page: 1, per_page: this.perPage })
+        .then((response) => {
           let promises = [Promise.resolve(response)];
           for (let i = 2; i <= response.data['result_info']['total_pages']; i++) {
-            promises.push(self.cloudflareClient.findRecord(zone.id, {page: i, per_page: self.perPage}));
+            promises.push(this.cloudflareClient.findRecord(zone.id, { page: i, per_page: this.perPage }));
           }
           return Promise.all(promises);
         });
-    }).then(function (responses) {
+    }).then((responses) => {
       let rows = [];
-      _.each(responses, function (response) {
-        _.each(response.data.result, function (item) {
+      _.each(responses, (response) => {
+        _.each(response.data.result, (item) => {
           item.ttl = (item.ttl === 1) ? 'Auto' : item.ttl;
           rows.push(item);
         });
@@ -399,15 +289,10 @@ function CloudflareCli(options) {
     });
   }
 
-  /**
-   *
-   * @param options
-   * @returns {PromiseLike<Result> | Promise<Result>}
-   */
-  function addZone(options) {
-    return self.cloudflareClient.addZone(options.name).then(function (response) {
+  addZone(options) {
+    return this.cloudflareClient.addZone(options.name).then((response) => {
       return new Result([
-        format(
+        this.format(
           'Added zone %s',
           response.data.result.name
         )
@@ -415,36 +300,27 @@ function CloudflareCli(options) {
     });
   }
 
-  /**
-   *
-   * @param options
-   * @returns {Promise<any>}
-   */
-  function removeZone(options) {
-    return getZone(options.name).then(function (zone) {
-      return self.cloudflareClient.removeZone(zone.id);
-    }).then(function (response) {
+  async removeZone(options) {
+    return this.getZone(options.name).then((zone) => {
+      return this.cloudflareClient.removeZone(zone.id);
+    }).then((response) => {
       return new Result(['Deleted zone with id ' + response.data.result.id]);
     });
   }
 
-  /**
-   * List zones in the current account
-   * @return {Promise}
-   */
-  function listZones() {
-    return self.cloudflareClient.findZones({page: 1, per_page: self.perPage})
-      .then(function (response) {
+  async listZones() {
+    return this.cloudflareClient.findZones({ page: 1, per_page: this.perPage })
+      .then((response) => {
         let promises = [Promise.resolve(response)];
         for (let i = 2; i <= response.data['result_info']['total_pages']; i++) {
-          promises.push(self.cloudflareClient.findZones({page: i, per_page: self.perPage}));
+          promises.push(this.cloudflareClient.findZones({ page: i, per_page: this.perPage }));
         }
         return Promise.all(promises);
       })
-      .then(function (responses) {
+      .then((responses) => {
         let rows = [];
-        _.each(responses, function (response) {
-          _.each(response.data.result, function (item) {
+        _.each(responses, (response) => {
+          _.each(response.data.result, (item) => {
             rows.push(_.extend(
               item,
               {
@@ -452,102 +328,63 @@ function CloudflareCli(options) {
                 accountName: item.account.name
               }
             ));
-          })
+          });
         });
         return new Result(rows);
       });
   }
 
-  /**
-   * Enable/disable dev mode
-   * @param options
-   */
-  function toggleDevMode(options) {
-    return getZone(options.domain).then(function (zone) {
-      //Use alternate api client
-      return self.cloudflareClient.setDevelopmentMode(zone.id, options.mode);
-    }).then(function () {
+  async toggleDevMode(options) {
+    return this.getZone(options.domain).then((zone) => {
+      return this.cloudflareClient.setDevelopmentMode(zone.id, options.mode);
+    }).then(() => {
       return new Result(['Dev mode changed to ' + options.mode]);
-    })
+    });
   }
 
-  /**
-   * Purge files from cache
-   * @param options
-   * @returns {Promise}
-   */
-  function purgeCache(options) {
-    return getZone(options.domain).then(function (zone) {
-      let query = (options._[1]) ? {files: options._.slice(1)} : {purge_everything: true};
-      return self.cloudflareClient.purgeCache(zone.id, query);
-    }).then(function () {
+  async purgeCache(options) {
+    return this.getZone(options.domain).then((zone) => {
+      let query = (options._ && options._[1]) ? { files: options._.slice(1) } : { purge_everything: true };
+      return this.cloudflareClient.purgeCache(zone.id, query);
+    }).then(() => {
       return new Result('Purged cache successfully');
     });
   }
 
-  /**
-   *
-   * @param zoneName {String}
-   * @returns {Promise}
-   */
-  function getZone(zoneName) {
-    return self.cloudflareClient.findZones({name: zoneName}).then(function (response) {
+  async getZone(zoneName) {
+    return this.cloudflareClient.findZones({ name: zoneName }).then((response) => {
       return response.data.result[0];
     });
   }
 
-  /**
-   * Display Help
-   * @return {Promise}
-   */
-  function showHelp() {
+  showHelp() {
     return Promise.resolve(new Result([fs.readFileSync(__dirname + '/doc/help.txt', 'utf8')]));
   }
 
-  /**
-   * Get command from available commands by name
-   * @param commandName
-   * @return {Object}
-   */
-  function getCommand(commandName) {
-    return _.find(commands, function (command) {
+  getCommand(commandName) {
+    return _.find(this.commands, (command) => {
       return _.includes(command.aliases, commandName);
     });
   }
 
-  /**
-   *
-   * @param cmd
-   * @param params
-   * @return {Object}
-   */
-  function mapParams(cmd, params) {
+  mapParams(cmd, params) {
     let query = [];
     if (cmd.mergeAdditionalParams && params._ !== undefined) {
       let paramCount = cmd.params.length + cmd.optionalParams.length;
       params._[paramCount] = _.slice(params._, paramCount).join(' ');
     }
-    //Process query option
     if (params.query) {
       query = params.query.split(',');
       params.query = _.fromPairs(
         _.map(query,
-          function (filter) {
-            return filter.split(':');
-          }
+          (filter) => filter.split(':')
         )
       );
-
     }
     return _.extend(params, _.fromPairs(_.zip(cmd.params.concat(cmd.optionalParams), _.drop(params._, 1))));
   }
 
-  /**
-   * Map options to parameters when adding or editing records
-   * @param options
-   * @return {*}
-   */
-  function mapRecordOptions(options) {
+  mapRecordOptions(options) {
     if (options.type === 'SRV') {
       let contentParts = options.content.split(' ');
       let serverParts = options.name.split('.');
@@ -559,7 +396,7 @@ function CloudflareCli(options) {
         weight: parseInt(contentParts[1]),
         port: parseInt(contentParts[2]),
         target: contentParts[3]
-      }
+      };
     }
     if (options.activate !== undefined) {
       options.proxied = options.activate;
@@ -568,16 +405,10 @@ function CloudflareCli(options) {
       options.name = _.toString(options.name);
     }
     options = _.omit(options, ['domain', 'email', 'token', '_', 'activate', 'a']);
-
     return options;
   }
 
-  /**
-   *
-   * @param options
-   * @param allowed
-   */
-  function getQueryParams(options, allowed) {
+  getQueryParams(options, allowed) {
     return _(options).pick(allowed)
       .omitBy(_.isUndefined)
       .mapValues((val) => {
@@ -589,13 +420,9 @@ function CloudflareCli(options) {
       }).value();
   }
 
-  /**
-   * Check that required config is set
-   * @param config
-   */
-  function validateConfig(config) {
+  validateConfig(config) {
     let missing = [];
-    _.each(requiredOptions, function (option) {
+    _.each(this.requiredOptions, (option) => {
       if (config[option] === undefined) {
         missing.push(option);
       }
@@ -611,8 +438,8 @@ function CloudflareCli(options) {
  * @param messages
  * @constructor
  */
-function Result(messages) {
-  this.messages = messages;
+export class Result {
+  constructor(messages) {
+    this.messages = messages;
+  }
 }
-
-module.exports = CloudflareCli;
