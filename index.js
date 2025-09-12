@@ -354,6 +354,9 @@ export class CloudflareCli {
 
   async getZone(zoneName) {
     return this.cloudflareClient.findZones({ name: zoneName }).then((response) => {
+      if (response.data.result.length === 0) {
+        throw new Error(`No matching zones found for "${zoneName}"`);
+      }
       return response.data.result[0];
     });
   }
