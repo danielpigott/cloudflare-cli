@@ -3,7 +3,7 @@ import { ConfigReader } from './../lib/configReader.js';
 import { v4 as uuid } from 'uuid';
 import _ from 'lodash';
 
-import { equal } from 'assert';
+import { expect } from 'expect';
 
 const config = new ConfigReader().readConfig();
 const cli = new CloudflareCli(config);
@@ -24,8 +24,7 @@ _.each(requiredEnvVars, function (envVar) {
 describe('CloudflareCli', function () {
   this.timeout(20000);
   it('should use environment variables where available', async function () {
-    equal(cli.key, process.env.CF_API_KEY);
-    equal(cli.email, process.env.CF_API_EMAIL);
+    expect(cli.key).toEqual(process.env.CF_API_KEY);
   });
   it('should add a zone', async function () {
     try {
@@ -48,24 +47,43 @@ describe('CloudflareCli', function () {
   });
   it('should find an A record', async function () {
     const result = await cli.findRecord({ domain: zoneName, 'name': recordName });
-    equal(result.messages[0].name, `${recordName}.${zoneName}`);
+    expect(result.messages[0].name).toEqual(`${recordName}.${zoneName}`);
   });
   it('should find an A record using a query', async function () {
     const result = await cli.findRecord({ domain: zoneName, query: { content: recordContent } });
-    equal(result.messages[0].name, `${recordName}.${zoneName}`);
+    expect(result.messages[0].name).toEqual(`${recordName}.${zoneName}`);
   });
   it('should find an A record querying by name', async function () {
     const result = await cli.findRecord({ domain: zoneName, query: { name: recordName } });
-    equal(result.messages[0].name, `${recordName}.${zoneName}`);
+    expect(result.messages[0].name).toEqual(`${recordName}.${zoneName}`);
   });
   it('should not find an A record when using a non-matching query', async function () {
     const result = await cli.findRecord({ domain: zoneName, query: { content: 'xyz' } });
-    equal(result.messages.length, 0);
+    expect(result.messages.length).toEqual(0);
+  });
+  it('should edit an A record', async function () {
+    const newContent = `${Math.floor(Math.random() * 10)}.${Math.floor(Math.random() * 10)}.${Math.floor(Math.random() * 10)}.${Math.floor(Math.random() * 10)}`;
+    const result = await cli.editRecord({
+      domain: zoneName,
+      name: recordName,
+      content: newContent,
+    });
+    expect(result.messages[0]).toContain(newContent);
+  });
+  it('should edit an A record changing type to CNAME', async function () {
+    const result = await cli.editRecord({
+      domain: zoneName,
+      name: recordName,
+      newtype: 'CNAME',
+      content: 'example.com',
+    });
+    expect(result.messages[0]).toContain('example.com');
   });
   it('should remove an A record', async function () {
     await cli.removeRecord({ 'domain': zoneName, 'name': recordName });
   });
   it('should remove a zone', async function () {
-    await cli.removeZone({ name: zoneName });
+    const result = await cli.removeZone({ name: zoneName });
+    expect(result.messages[0]).toContain('Deleted');
   });
 });

@@ -131,6 +131,7 @@ OPTIONS:
     -a  --activate  Activate cloudflare after creating record (for addrecord)
     -f  --format    Format when printing records (csv,json or table)
     -t  --type      Type of record (for dns record functions)
+    -n  --newtype   Type of record to update to when editing a record
     -p  --priority  Set priority when adding a record (MX or SRV)
     -q  --query     Comma separated filters to use when finding a record
     -l  --ttl       Set ttl on add or edit (120 - 86400 seconds, or 1 for auto)
@@ -172,6 +173,11 @@ cfcli -a -t A add mail 8.8.8.8
 Edit a record (mail) and set the TTL
 ```
 cfcli --ttl 120 edit  mail 8.8.8.8
+```
+
+Edit a record (test) and change the type to CNAME
+```
+cfcli -t A -n CNAME test example.com
 ```
 
 Add an SRV record (then 3 numbers are priority, weight and port respectively)

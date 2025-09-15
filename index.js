@@ -57,7 +57,7 @@ export class CloudflareCli {
         callback: this.editRecord.bind(this),
         description: 'Edit a DNS record',
         params: ['name', 'content'],
-        optionalParams: [],
+        optionalParams: ['new-type'],
         formatter: new MessageFormatter()
       },
       enable: {
@@ -195,7 +195,7 @@ export class CloudflareCli {
   async toggleAlwaysUseHttps(options) {
     const zone = await this.getZone(options.domain);
     await this.cloudflareClient.setAlwaysUseHttps(zone.id, options.mode);
-    return new Result(['Always Use HTTPS mode changed to ' + options.mode]);
+    return new Result([`Always Use HTTPS mode changed to ${options.mode}`]);
   }
 
   enableProxy(options) {
@@ -209,25 +209,25 @@ export class CloudflareCli {
   }
 
   async editRecord(options) {
-    return this.find(options.domain, this.getQueryParams(options, ['name', 'type', 'query'])).then((response) => {
-      const records = response.data.result;
-      options = this.mapRecordOptions(options);
-      if (records.length === 0) {
-        throw new Error('No matching records found');
-      } else if (records.length === 1) {
-        let record = records[0];
-        options.type = options.type || record.type;
-        options.content = options.content || record.content;
-        return this.cloudflareClient.editRecord(record.zone_id, record.id, options);
-      } else {
-        throw new Error(this.format('%d matching records found, unable to update', records.count));
-      }
-    }).then((response) => {
-      let record = response.data.result;
-      return new Result([
-        this.format('Updated %s record %s (id: %s)', record.type, record.name, record.id)
-      ]);
-    });
+    const queryResonse = await this.find(options.domain, this.getQueryParams(options, ['name', 'type', 'query']))
+    const records = queryResonse.data.result;
+    options = this.mapRecordOptions(options);
+    if (records.length === 0) {
+      throw new Error('No matching records found');
+    } else if (records.length > 1) {
+      throw new Error(this.format('%d matching records found, unable to update', records.count));
+    }
+
+    const record = records[0];
+    options.type = options.newtype || record.type;
+    options.content = options.content || record.content;
+    const zone = await this.getZone(options.domain);
+    const editResponse = await this.cloudflareClient.editRecord(zone.id, record.id, options);
+
+    const updatedRecord = editResponse.data.result;
+    return new Result([
+      this.format('Updated %s record %s (id: %s)', updatedRecord.type, updatedRecord.content, updatedRecord.id)
+    ]);
   }
 
   async removeRecord(options) {
@@ -246,7 +246,7 @@ export class CloudflareCli {
     });
     const responses = await Promise.all(results);
     return new Result(_.map(responses, (response) => {
-      return 'Deleted record with id ' + response.data.result.id;
+      return `Deleted record ${query.name} with id ${response.data.result.id}`;
     }));
   }
 
@@ -305,7 +305,7 @@ export class CloudflareCli {
     return this.getZone(options.name).then((zone) => {
       return this.cloudflareClient.removeZone(zone.id);
     }).then((response) => {
-      return new Result(['Deleted zone with id ' + response.data.result.id]);
+      return new Result([`Deleted zone with id ${response.data.result.id}`]);
     });
   }
 
@@ -339,7 +339,7 @@ export class CloudflareCli {
     return this.getZone(options.domain).then((zone) => {
       return this.cloudflareClient.setDevelopmentMode(zone.id, options.mode);
     }).then(() => {
-      return new Result(['Dev mode changed to ' + options.mode]);
+      return new Result([`Dev mode changed to ${options.mode}`]);
     });
   }
 
@@ -362,7 +362,7 @@ export class CloudflareCli {
   }
 
   showHelp() {
-    return Promise.resolve(new Result([fs.readFileSync(path.resolve() + '/doc/help.txt', 'utf8')]));
+    return Promise.resolve(new Result([fs.readFileSync(`${path.resolve()}/doc/help.txt`, 'utf8')]));
   }
 
   getCommand(commandName) {
@@ -432,7 +432,7 @@ export class CloudflareCli {
       }
     });
     if (missing.length > 0) {
-      throw new Error('The following required parameters were not provided: ' + missing.join(','));
+      throw new Error(`The following required parameters were not provided: ${missing.join(',')}`);
     }
   }
 }
