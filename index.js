@@ -4,6 +4,10 @@ import { ApiClient } from './lib/apiClient.js';
 import _ from 'lodash';
 import { MessageFormatter, TableFormatter } from './lib/formatters.js';
 import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 export class CloudflareCli {
   constructor(options) {
@@ -362,7 +366,7 @@ export class CloudflareCli {
   }
 
   showHelp() {
-    return Promise.resolve(new Result([fs.readFileSync(`${path.resolve()}/doc/help.txt`, 'utf8')]));
+    return Promise.resolve(new Result([fs.readFileSync(path.join(__dirname, 'doc', 'help.txt'), 'utf8')]));
   }
 
   getCommand(commandName) {

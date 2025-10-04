@@ -13,5 +13,10 @@ try {
   process.exit(1);
 }
 let params = { ...config, ...argv };
+// Remove email from params to force Bearer token authentication
+// The old API Key authentication (email + key) is deprecated and causes issues with newer axios
+if (params.token && params.email) {
+  delete params.email;
+}
 let cli = new CloudflareCli(params);
 cli.runCommand(argv._[0], params);
