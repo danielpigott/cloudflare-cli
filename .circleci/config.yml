@@ -23,7 +23,7 @@ jobs:
           command: |
             corepack enable --install-directory ~/bin
             corepack prepare yarn@latest --activate
-      - run: yarn install --immutable-cache
+      - run: yarn install --immutable
 
       - save_cache:
           paths:
