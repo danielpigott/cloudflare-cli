@@ -23,7 +23,7 @@ jobs:
           command: |
             corepack enable --install-directory ~/bin
             corepack prepare yarn@latest --activate
-      - run: yarn install --frozen-lockfile
+      - run: yarn install --immutable-cache
 
       - save_cache:
           paths:
@@ -33,7 +33,7 @@ jobs:
       - run:
           command: yarn test-ci
           environment:
-            JUNIT_REPORT_PATH: /home/circleci/junit/
+            JEST_JUNIT_OUTPUT_DIR: /home/circleci/junit/
       - store_test_results:
           path: ~/junit
       - store_artifacts:
