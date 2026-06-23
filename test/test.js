@@ -1,9 +1,10 @@
-import { CloudflareCli } from './../index.js';
-import { ConfigReader } from './../lib/configReader.js';
+import { CloudflareCli } from '../index.js';
+import { ConfigReader } from '../lib/configReader.js';
 import { v4 as uuid } from 'uuid';
 import _ from 'lodash';
+import { jest } from '@jest/globals';
 
-import { expect } from 'expect';
+jest.setTimeout(20000);
 
 const config = new ConfigReader().readConfig();
 const cli = new CloudflareCli(config);
@@ -22,7 +23,6 @@ _.each(requiredEnvVars, function (envVar) {
 });
 
 describe('CloudflareCli', function () {
-  this.timeout(20000);
   it('should use environment variables where available', async function () {
     expect(cli.key).toEqual(process.env.CF_API_KEY);
   });
