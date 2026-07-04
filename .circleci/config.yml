@@ -18,8 +18,12 @@ jobs:
           - v1-dependencies-{{ checksum "package.json" }}
           # fallback to using the latest cache if no exact match is found
           - v1-dependencies-
-
-      - run: yarn install
+      - run:
+          name: Enable Corepack
+          command: |
+            corepack enable --install-directory ~/bin
+            corepack prepare yarn@latest --activate
+      - run: yarn install --immutable
 
       - save_cache:
           paths:
@@ -29,7 +33,7 @@ jobs:
       - run:
           command: yarn test-ci
           environment:
-            JUNIT_REPORT_PATH: /home/circleci/junit/
+            JEST_JUNIT_OUTPUT_DIR: /home/circleci/junit/
       - store_test_results:
           path: ~/junit
       - store_artifacts:
