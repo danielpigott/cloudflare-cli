@@ -22,8 +22,8 @@ jobs:
           name: Enable Corepack
           command: |
             corepack enable --install-directory ~/bin
-            corepack prepare yarn@latest --activate
-      - run: yarn install --immutable
+            corepack prepare pnpm@9.0.0 --activate
+      - run: pnpm install --frozen-lockfile
 
       - save_cache:
           paths:
@@ -31,7 +31,7 @@ jobs:
           key: v1-dependencies-{{ checksum "package.json" }}
       - run: mkdir ~/junit
       - run:
-          command: yarn test-ci
+          command: pnpm test-ci
           environment:
             JEST_JUNIT_OUTPUT_DIR: /home/circleci/junit/
       - store_test_results:
