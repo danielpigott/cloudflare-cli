@@ -239,5 +239,5 @@ Running the tests will add a zone _(cloudflaretest.com)_, add and remove records
  The tests can be run with the following command
 
 ```bash
-yarn test
+pnpm test
 ```
