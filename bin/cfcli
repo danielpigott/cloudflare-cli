@@ -2,8 +2,8 @@
 import allowedOptions from './../lib/options.js';
 import { CloudflareCli } from './../index.js';
 import { ConfigReader } from './../lib/configReader.js';
-import minimist from 'minimist';
-let argv = minimist(process.argv.slice(2), allowedOptions);
+import { parseArgs } from './../lib/argv.js';
+let argv = parseArgs(process.argv.slice(2), allowedOptions);
 let configFile = argv.config || '~/.cfcli.yml';
 let config = {};
 try {
