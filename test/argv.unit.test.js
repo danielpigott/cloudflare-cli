@@ -9,4 +9,8 @@ describe('parseArgs', () => {
     expect(argv._[1]).toBe('000');
     expect(argv._[2]).toBe('abc.com');
   });
+
+  it('rejects single-dash long options', () => {
+    expect(() => parseArgs(['edit', '-d', 'test.com', '-t', 'CNAME', '-query', 'name:testrecord.test.com', '000'], allowedOptions)).toThrow(/invalid argument syntax/i);
+  });
 });

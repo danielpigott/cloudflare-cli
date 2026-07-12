@@ -1,6 +1,6 @@
 import util from 'util';
 import fs from 'fs';
-import { ApiClient } from './lib/apiClient.js';
+import { ApiClient, FakeApiClient } from './lib/apiClient.js';
 import _ from 'lodash';
 import { MessageFormatter, TableFormatter } from './lib/formatters.js';
 import path from 'path';
@@ -16,7 +16,10 @@ export class CloudflareCli {
     this.key = options.token || null;
     this.perPage = 50;
     this.format = util.format;
-    this.cloudflareClient = new ApiClient(options.token, options.email);
+    const clientType = options.apiClientType || 'real';
+    this.cloudflareClient = clientType === 'fake'
+      ? new FakeApiClient(options.token, options.email)
+      : new ApiClient(options.token, options.email);
     this.commands = {
       add: {
         aliases: ['add', 'addrecord'],

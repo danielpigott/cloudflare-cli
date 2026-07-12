@@ -15,14 +15,15 @@ const requiredEnvVars = [
   'CF_API_KEY',
 ];
 
-_.each(requiredEnvVars, function (envVar) {
-  if (process.env[envVar] === undefined) {
-    console.log(`Missing env var ${envVar}`);
-    process.exit(1);
-  }
-});
+const missingEnvVars = requiredEnvVars.filter((envVar) => process.env[envVar] === undefined);
 
-describe('CloudflareCli', function () {
+if (missingEnvVars.length > 0) {
+  console.log(`Skipping integration tests because missing env var(s): ${missingEnvVars.join(', ')}`);
+}
+
+const integrationDescribe = missingEnvVars.length > 0 ? describe.skip : describe;
+
+integrationDescribe('CloudflareCli (integration)', function () {
   it('should use environment variables where available', async function () {
     expect(cli.key).toEqual(process.env.CF_API_KEY);
   });

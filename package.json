@@ -32,6 +32,8 @@
   },
   "scripts": {
     "test": "NODE_OPTIONS=\"--experimental-vm-modules\" jest --reporters=default",
+    "test:unit": "NODE_OPTIONS=\"--experimental-vm-modules\" jest --reporters=default --testPathPattern=\\.unit\\.test\\.js$",
+    "test:integration": "NODE_OPTIONS=\"--experimental-vm-modules\" jest --reporters=default --testPathPattern=integration\\.test\\.js$",
     "test-ci": "NODE_OPTIONS=\"--experimental-vm-modules\" jest --reporters=jest-junit"
   },
   "preferGlobal": true,
@@ -41,8 +43,7 @@
     "expect": "^30.1.2",
     "jest-junit": "^17.0.0",
     "js-yaml": "~4.2.0",
-    "lodash": "~4.18.1",
-    "minimist": "~1.2.0"
+    "lodash": "~4.18.1"
   },
   "devDependencies": {
     "jest": "^29.6.1",

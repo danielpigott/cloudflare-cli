@@ -231,13 +231,26 @@ cfcli zone-add test.com
 ```
 
 ### Testing
-In order to run the tests you will need to set valid values for the
-  `CF_API_EMAIL` and `CF_API_KEY` environment variables.
+The test suite is split into unit tests and integration tests.
 
-Running the tests will add a zone _(cloudflaretest.com)_, add and remove records against that domain and then remove the zone.
+Unit tests run locally without any Cloudflare credentials and cover the CLI argument parsing and the fake API client behavior.
 
- The tests can be run with the following command
+Integration tests require valid values for the `CF_API_EMAIL` and `CF_API_KEY` environment variables. Running them will add a zone _(cloudflaretest.com)_, add and remove records against that domain and then remove the zone.
+
+Run the test suites with:
 
 ```bash
 pnpm test
+pnpm test:unit
+pnpm test:integration
 ```
+
+For local development and offline testing, the CLI can be instantiated with the fake API client:
+
+```js
+import { CloudflareCli } from './index.js';
+
+const cli = new CloudflareCli({ token: 'fake', apiClientType: 'fake' });
+```
+
+This provides an in-memory backend that supports the same high-level operations as the real Cloudflare client without needing network access or credentials.
