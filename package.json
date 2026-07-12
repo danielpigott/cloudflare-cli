@@ -1,6 +1,6 @@
 {
   "name": "cloudflare-cli",
-  "version": "6.1.0",
+  "version": "6.2.0",
   "description": "A command line interface for interacting with cloudflare",
   "homepage": "https://github.com/danielpigott/cloudflare-cli",
   "bugs": {
@@ -34,6 +34,7 @@
     "test": "NODE_OPTIONS=\"--experimental-vm-modules\" jest --reporters=default",
     "test:unit": "NODE_OPTIONS=\"--experimental-vm-modules\" jest --reporters=default --testPathPattern=\\.unit\\.test\\.js$",
     "test:integration": "NODE_OPTIONS=\"--experimental-vm-modules\" jest --reporters=default --testPathPattern=integration\\.test\\.js$",
+    "test:coverage": "NODE_OPTIONS=\"--experimental-vm-modules\" jest --coverage --reporters=default",
     "test-ci": "NODE_OPTIONS=\"--experimental-vm-modules\" jest --reporters=jest-junit"
   },
   "preferGlobal": true,

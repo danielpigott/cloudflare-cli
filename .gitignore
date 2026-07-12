@@ -3,3 +3,4 @@ node_modules/
 .idea
 junit
 .vscode/settings.json
+coverage/
