@@ -68,7 +68,7 @@ describe('CloudflareCli index helpers (unit)', () => {
     await cli.addRecord({ domain: 'example.com', type: 'A', name: 'www', content: '1.2.3.4' });
     await cli.addRecord({ domain: 'example.com', type: 'A', name: 'www', content: '1.2.3.5' });
 
-    await expect(cli.editRecord({ domain: 'example.com', name: 'www', content: '1.2.3.6' })).rejects.toThrow('matching records found');
+    await expect(cli.editRecord({ domain: 'example.com', name: 'www', content: '1.2.3.6' })).rejects.toThrow('2 matching records found, unable to update');
   });
 
   it('throws when removeRecord is missing a name', async () => {

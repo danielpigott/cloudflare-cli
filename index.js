@@ -207,28 +207,28 @@ export class CloudflareCli {
 
   enableProxy(options) {
     options.activate = true;
-    return this.editRecord(options);
+    return this.editRecord(options, ['name', 'content', 'type', 'query']);
   }
 
   disableProxy(options) {
     options.activate = false;
-    return this.editRecord(options);
+    return this.editRecord(options, ['name', 'content', 'type', 'query']);
   }
 
-  async editRecord(options) {
-    const queryResonse = await this.find(options.domain, this.getQueryParams(options, ['name', 'type', 'query']))
+  async editRecord(options, queryFields = ['name', 'type', 'query']) {
+    const queryResonse = await this.find(options.domain, this.getQueryParams(options, queryFields))
     const records = queryResonse.data.result;
-    options = this.mapRecordOptions(options);
     if (records.length === 0) {
       throw new Error('No matching records found');
     } else if (records.length > 1) {
-      throw new Error(this.format('%d matching records found, unable to update', records.count));
+      throw new Error(this.format('%d matching records found, unable to update', records.length));
     }
 
     const record = records[0];
+    const zone = await this.getZone(options.domain);
+    options = this.mapRecordOptions(options);
     options.type = options.newtype || record.type;
     options.content = options.content || record.content;
-    const zone = await this.getZone(options.domain);
     const editResponse = await this.cloudflareClient.editRecord(zone.id, record.id, options);
 
     const updatedRecord = editResponse.data.result;
