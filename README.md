@@ -22,7 +22,8 @@ docker run --rm -it dpig/cloudflare-cli -h
 
 Build Dockerfile locally
 ```bash
-git clone https://github.com/danielpigott/cloudflare-cli.git\
+git clone https://github.com/danielpigott/cloudflare-cli.git
+cd cloudflare-cli
 docker build -t cloudflare-cli .
 # Running a command
 docker run --rm -it cloudflare-cli -h
@@ -38,7 +39,7 @@ Cloudflare has two API client methods:  [API Tokens](https://developers.cloudfla
 * **API Tokens** can be setup with specific permissions and do _not_ use an email address. Recommended by Cloudflare
 * **API Keys** are the legacy method, do not have specific permissions and require the corresponding user's email address to be provided.
 
-In the `cfcli` setup, if you _exclude_ an email address, then the `cfcli` tool will assume you are using an **API Token** instead of an **API Key**.
+The `cfcli` command uses **API Tokens**. Legacy API Key authentication is deprecated; the command rejects configurations containing both `token` and `email`. Use an API Token and omit `email` from your configuration.
 
 ![doc/cloudflare_api_tokens_and_keys.png](doc/cloudflare_api_tokens_and_keys.png)
 
@@ -49,7 +50,6 @@ If you have only one cloudflare account you can set it up as below:
 ```yaml
 defaults:
     token: <cloudflare-token>
-    email: <you@domain.com> #Only required if using legacy API Key
     domain: <default-cloudflare-domain>
 ```
 
@@ -61,11 +61,9 @@ defaults:
 accounts:
     work:
         token: <cloudflare-token>
-        email: <you@domain.com>
         domain: <default-cloudflare-domain>
     play:
         token: <cloudflare-token>
-        email: <you@domain.com>
         domain: <default-cloudflare-domain>
     adventure:
         token: <cloudflare-token>
@@ -90,11 +88,12 @@ You can supply the docker version with your configuration file automatically wit
 
 ```bash
 mkdir -p $HOME/bin ; touch $HOME/bin/cloudflare-cli ; chmod 755 $HOME/bin/cloudflare-cli
-cat > $HOME/bin/cloudflare-cli << END
+cat > $HOME/bin/cloudflare-cli << 'END'
 #!/bin/bash
 # CLI for interacting with Cloudflare
 # https://github.com/danielpigott/cloudflare-cli
 docker run --rm -it -v ~/.cfcli.yml:/root/.cfcli.yml dpig/cloudflare-cli "$@"
+END
 ```
 
 You can now run the `cloudflare-cli` command directly
@@ -105,11 +104,11 @@ cloudflare-cli ls
 ### Environment Variables
 
 * Environment variables take precedence over the configuration file.
-* If the `CF_API_EMAIL` variable is excluded, then the request will be made using what is assumed to be an **API Token** vs. an **API Key.**
+* Use an API Token for `CF_API_KEY` and leave `CF_API_EMAIL` unset. Setting both makes the command reject the deprecated API Key configuration.
 
 ```
 CF_API_KEY # maps to token
-CF_API_EMAIL # maps to email
+CF_API_EMAIL # maps to email (deprecated; leave unset for API Tokens)
 CF_API_DOMAIN # maps to domain
 ```
 
@@ -177,7 +176,7 @@ cfcli --ttl 120 edit  mail 8.8.8.8
 
 Edit a record (test) and change the type to CNAME
 ```
-cfcli -t A -n CNAME test example.com
+cfcli -t A -n CNAME edit test example.com
 ```
 
 Add an SRV record (then 3 numbers are priority, weight and port respectively)
@@ -235,7 +234,7 @@ The test suite is split into unit tests and integration tests.
 
 Unit tests run locally without any Cloudflare credentials and cover the CLI argument parsing and the fake API client behavior.
 
-Integration tests require valid values for the `CF_API_EMAIL` and `CF_API_KEY` environment variables. Running them will add a zone _(cloudflaretest.com)_, add and remove records against that domain and then remove the zone.
+Integration tests require a valid API Token in `CF_API_KEY`. Running them will add a temporary zone, add and remove records against that domain and then remove the zone. Only run these against an authorized Cloudflare account.
 
 Run the test suites with:
 
